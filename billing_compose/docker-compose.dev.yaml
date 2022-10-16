@@ -1,0 +1,67 @@
+version: "3.9"
+services:
+
+  postgres:
+    container_name: postgres
+    image: postgres:14.2
+    volumes:
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - billing_db:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file:
+      - ./postgres/.env
+    networks:
+      - backend
+
+  redis:
+    container_name: redis
+    image: redis:6.2.6
+    volumes:
+      - redisdata:/data
+    ports:
+      - 6379:6379
+    env_file:
+      - ./redis/.env
+    networks:
+      - backend
+
+  django:
+    container_name: django
+    build:
+      context: ./django
+      dockerfile: ./Dockerfile
+    command: gunicorn config.wsgi -b 0.0.0.0:8000 --timeout 900 --chdir=/code
+    volumes:
+      - static:/code/static
+    ports:
+      - 8000:8000
+    env_file:
+      - ./django/.env
+    depends_on:
+      - postgres
+    networks:
+      - backend
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - static:/var/www/static/
+    depends_on:
+      - django
+    ports:
+      - 80:80
+    restart: always
+    networks:
+      - backend
+
+volumes:
+  static:
+  billing_db:
+  redisdata:
+
+
+networks:
+  backend:
