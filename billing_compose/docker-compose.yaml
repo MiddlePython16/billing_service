@@ -2,7 +2,6 @@ version: "3.9"
 services:
 
   postgres:
-    container_name: postgres
     image: postgres:14.2
     volumes:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -13,7 +12,6 @@ services:
       - backend
 
   redis:
-    container_name: redis
     image: redis:6.2.6
     volumes:
       - redisdata:/data
@@ -23,11 +21,10 @@ services:
       - backend
 
   django:
-    container_name: django
     build:
       context: ./django
       dockerfile: ./Dockerfile
-    command: gunicorn config.wsgi -b 0.0.0.0:8000 --timeout 900 --chdir=/code
+    command: sh -c "python manage.py migrate && python manage.py collectstatic --no-input && gunicorn config.wsgi -b 0.0.0.0:8000 --timeout 900 --chdir=/code"
     volumes:
       - static:/code/static
     env_file:
