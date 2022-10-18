@@ -1,0 +1,2 @@
+class NoRequestInstance(Exception):
+    pass
