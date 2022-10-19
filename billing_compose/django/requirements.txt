@@ -6,3 +6,4 @@ psycopg2-binary==2.9.4
 python-dotenv==0.21.0
 redis==4.3.4
 PyJWT==2.4.0
+stripe==4.2.0

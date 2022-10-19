@@ -8,7 +8,7 @@ services:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - billing_db:/var/lib/postgresql/data
     ports:
-      - 5432:5432
+      - 5434:5432
     env_file:
       - ./postgres/.env
     networks:
@@ -52,7 +52,7 @@ services:
     depends_on:
       - django
     ports:
-      - 80:80
+      - 85:80
     restart: always
     networks:
       - backend

@@ -19,6 +19,9 @@ from payment import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('payment/', views.payment),
+    path('', views.index, ),
     path('test/', views.test),
+    path('thanks/', views.thanks),
+    path('checkout/', views.checkout),
+    path('stripe_webhook/', views.stripe_webhook),
 ]
