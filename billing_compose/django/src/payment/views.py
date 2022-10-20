@@ -2,11 +2,11 @@ from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
 from payments import get_payment_model, RedirectNeeded
 from django.shortcuts import render
-from django.http import HttpResponseRedirect
 from decimal import Decimal
 
 
-def payment_details(request, payment_id):
+def payment_details(request, *args, **kwargs):
+    payment_id = kwargs.get('payment_id')
     payment = get_object_or_404(get_payment_model(), id=payment_id)
 
     try:
@@ -30,8 +30,9 @@ def index(request):
 def create_payment(request):
     if request.method == 'GET':
         Payment = get_payment_model()
+        # todo поставить нормальные данные
         payment = Payment.objects.create(
-            variant='default',  # this is the variant from PAYMENT_VARIANTS
+            variant='stripe',  # this is the variant from PAYMENT_VARIANTS
             description='Book purchase',
             total=Decimal(120),
             tax=Decimal(20),
@@ -48,6 +49,5 @@ def create_payment(request):
             customer_ip_address='127.0.0.1',
         )
 
-        print('Кнопка нажата', flush=True)
-
-        return HttpResponseRedirect('some_path', {'payment_id': payment.transaction_id})
+        print(payment.transaction_id, flush=True)
+        return redirect('payment_details', payment_id=payment.id)
