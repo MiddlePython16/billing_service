@@ -7,3 +7,4 @@ python-dotenv==0.21.0
 redis==4.3.4
 PyJWT==2.4.0
 stripe==4.2.0
+django-payments[stripe]==1.0.0

@@ -24,7 +24,7 @@ services:
     build:
       context: ./django
       dockerfile: ./Dockerfile
-    command: sh -c "python manage.py migrate && python manage.py collectstatic --no-input && gunicorn config.wsgi -b 0.0.0.0:8000 --timeout 900 --chdir=/code"
+    command: sh -c "sleep 5 && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn config.wsgi -b 0.0.0.0:8000 --timeout 900 --chdir=/code"
     volumes:
       - static:/code/static
     env_file:

@@ -1,82 +1,53 @@
-import json
-
-from django.http import HttpResponse, JsonResponse
-
-from extensions.jwt.jwt import jwt_required
-from payment.tasks import test_task
+from django.shortcuts import get_object_or_404, redirect
+from django.template.response import TemplateResponse
+from payments import get_payment_model, RedirectNeeded
 from django.shortcuts import render
-from django.views.decorators.csrf import csrf_exempt
-from django.urls import reverse
-from django.conf import settings
-import stripe
-from http import HTTPStatus
+from django.http import HttpResponseRedirect
+from decimal import Decimal
 
 
-def payment(request):
-    test_task.delay()
-    return HttpResponse('payment')
+def payment_details(request, payment_id):
+    payment = get_object_or_404(get_payment_model(), id=payment_id)
+
+    try:
+        form = payment.get_form(data=request.POST or None)
+    except RedirectNeeded as redirect_to:
+        return redirect(str(redirect_to))
+
+    return TemplateResponse(
+        request,
+        'payment.html',
+        {'form': form, 'payment': payment}
+    )
 
 
 def index(request):
+    if request.GET.get('buy_now_btn'):
+        print('Кнопка нажата', flush=True)
     return render(request, 'index.html')
 
 
-def thanks(request):
-    return render(request, 'thanks.html')
-
-
-@jwt_required(optional=True)
-def test(request, *args, **kwargs):
-    if kwargs['current_user']:
-        return HttpResponse(json.dumps(kwargs['current_user']))
-    else:
-        return HttpResponse('no user')
-
-
-@csrf_exempt
-def checkout(request):
-    session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price': settings.STRIPE_PRODUCT_PRICE_ID,
-            'quantity': 1,
-        }],
-        mode='payment',
-        success_url=request.build_absolute_uri(reverse('thanks')) + '?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=request.build_absolute_uri(reverse('index')),
-    )
-
-    return JsonResponse({
-        'session_id': session.id,
-        'stripe_public_key': settings.STRIPE_PUBLIC_KEY
-    })
-
-
-@csrf_exempt
-def stripe_webhook(request):
-    print('WEBHOOK!')
-    # todo получить нормальный токен и вынести в .env
-    endpoint_secret = 'whsec_Xj8wBk2qiUcjDEmYu5kfKkOrJCJ5UUjW'
-
-    payload = request.body
-    sig_header = request.META['HTTP_STRIPE_SIGNATURE']
-
-    try:
-        event = stripe.Webhook.construct_event(
-            payload, sig_header, endpoint_secret
+def create_payment(request):
+    if request.method == 'GET':
+        Payment = get_payment_model()
+        payment = Payment.objects.create(
+            variant='default',  # this is the variant from PAYMENT_VARIANTS
+            description='Book purchase',
+            total=Decimal(120),
+            tax=Decimal(20),
+            currency='USD',
+            delivery=Decimal(10),
+            billing_first_name='Sherlock',
+            billing_last_name='Holmes',
+            billing_address_1='221B Baker Street',
+            billing_address_2='',
+            billing_city='London',
+            billing_postcode='NW1 6XE',
+            billing_country_code='GB',
+            billing_country_area='Greater London',
+            customer_ip_address='127.0.0.1',
         )
-    except ValueError as e:
-        # Invalid payload
-        return HttpResponse(status=HTTPStatus.BAD_REQUEST)
-    except stripe.error.SignatureVerificationError as e:
-        # Invalid signature
-        return HttpResponse(status=HTTPStatus.BAD_REQUEST)
 
-    # Handle the checkout.session.completed event
-    if event['type'] == 'checkout.session.completed':
-        session = event['data']['object']
-        print(session)
-        line_items = stripe.checkout.Session.list_line_items(session['id'], limit=1)
-        print(line_items)
+        print('Кнопка нажата', flush=True)
 
-    return HttpResponse(status=HTTPStatus.OK)
+        return HttpResponseRedirect('some_path', {'payment_id': payment.transaction_id})
