@@ -111,11 +111,6 @@ CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
 
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 STRIPE_PRIVATE_KEY = os.environ.get('STRIPE_PRIVATE_KEY')
-STRIPE_PRODUCT_PRICE_ID = os.environ.get('STRIPE_PRODUCT_PRICE_ID')
-
-# todo потом вынести в переменные окружения
-PAYMENT_HOST = 'localhost:8000'
-PAYMENT_USES_SSL = False
 
 PAYMENT_MODEL = 'payment.Payment'
 

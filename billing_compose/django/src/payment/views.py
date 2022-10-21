@@ -17,7 +17,7 @@ def payment_details(request, *args, **kwargs):
     return TemplateResponse(
         request,
         'payment.html',
-        {'form': form, 'payment': payment}
+        {'form': form, 'payment': payment},
     )
 
 
@@ -30,23 +30,14 @@ def index(request):
 def create_payment(request):
     if request.method == 'GET':
         Payment = get_payment_model()
-        # todo поставить нормальные данные
         payment = Payment.objects.create(
-            variant='stripe',  # this is the variant from PAYMENT_VARIANTS
-            description='Book purchase',
-            total=Decimal(120),
-            tax=Decimal(20),
-            currency='USD',
-            delivery=Decimal(10),
-            billing_first_name='Sherlock',
-            billing_last_name='Holmes',
-            billing_address_1='221B Baker Street',
-            billing_address_2='',
-            billing_city='London',
-            billing_postcode='NW1 6XE',
-            billing_country_code='GB',
-            billing_country_area='Greater London',
-            customer_ip_address='127.0.0.1',
+            variant='stripe',
+            description='Subscription',
+            total=Decimal(499),
+            tax=Decimal(0),
+            currency='RUB',
+            # todo добавить юзернейм пользователя
+            billing_first_name='Some name',
         )
 
         print(payment.transaction_id, flush=True)
