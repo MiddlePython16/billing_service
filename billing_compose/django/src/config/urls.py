@@ -21,4 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('payment/', views.payment),
     path('test/', views.test),
+    path('add_test_product/', views.add_test_product),
+    path('add_test_not_paid_payment/', views.add_test_not_paid_payment),
+    path('add_test_paid_payment/', views.add_test_paid_payment),
 ]

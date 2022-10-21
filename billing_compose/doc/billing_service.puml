@@ -1,0 +1,62 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+!define DEVICONS https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/devicons
+!define FONTAWESOME https://raw.githubusercontent.com/tupadr3/plantuml-icon-font-sprites/master/font-awesome-5
+
+!include FONTAWESOME/users.puml
+!include DEVICONS/chrome.puml
+
+!include <logos/stripe>
+!include <logos/django>
+!include <logos/postgresql>
+!include <logos/redis>
+
+
+LAYOUT_WITH_LEGEND()
+
+Person(users, "Users", $sprite="users")
+Person(admin, "Administator")
+
+Container(site, "Web Site", "Frontend", $sprite="chrome")
+
+System_Boundary(auth_service, "Auth Service") {
+    Container(auth, "Auth")
+}
+
+System_Ext(payment_service, "Payment Processing Platform", $sprite="stripe")
+
+System_Boundary(billing_service, "Billing Service") {
+    ContainerDb(postgres, "Database", "Postgres", $sprite="postgresql")
+    ContainerDb(redis, "Broker", "Redis", $sprite="redis")
+    Container(celery, "Scheduler service", "Celery", "periodical payments")
+    Container_Boundary(billing, "Billing") {
+        Component(billing_admin, "Admin Panel", "Django app", $sprite="django")
+        Component(billing_main, "Billing page", "Django app", $sprite="django")
+
+        Lay_L(billing_admin, celery)
+        Lay_L(celery, billing_main)
+
+        Rel(billing_main, payment_service, "redirect")
+        Rel_U(payment_service, billing_main, "callback", "webhook")
+
+        Rel(billing, postgres, "Read/Write")
+        Rel(billing_main, redis, "Write")
+    }
+
+}
+
+Rel(users, site, "https")
+Rel(admin, site, "https")
+
+Rel(site, billing_main, "link")
+Rel(site, billing_admin, "link")
+Rel_U(celery, redis, "get")
+Rel_U(celery, postgres, "Read/Write")
+Rel(site, auth, "authorize", "API")
+Rel_U(auth, site, "tokens")
+
+' Rel_L(auth, billing_admin, "Redirect admin to admin panel")
+
+@enduml

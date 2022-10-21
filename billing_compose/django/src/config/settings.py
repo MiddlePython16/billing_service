@@ -4,6 +4,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from split_settings.tools import include
 
+from celery.schedules import crontab
+
 load_dotenv()
 
 
@@ -31,7 +33,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-
+    'django_extensions',
     'payment.apps.PaymentConfig',
 ]
 
@@ -109,9 +111,22 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-REDIS_HOST = os.environ.get('REDIS_HOST')
-REDIS_PORT = os.environ.get('REDIS_PORT')
+REDIS_HOST = os.environ.get('REDIS_HOST', '127.0.0.1')
+REDIS_PORT = os.environ.get('REDIS_PORT', 6379)
 
 JWT_PUBLIC_KEY = os.environ.get('JWT_PUBLIC_KEY')
 JWT_TOKEN_LOCATION = ['headers', 'cookies']
+
 CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+CELERY_BEAT_SCHEDULE = {
+    'check_not_paid': {
+        'task': 'payment.tasks.check_not_paid_task',
+        # 'schedule': 30.0
+        'schedule': crontab(minute=0)
+    },
+    'remove_not_paid': {
+        'task': 'payment.tasks.remove_not_paid_task',
+        # 'schedule': 45.0
+        'schedule': crontab(hour=0)
+    }
+}
