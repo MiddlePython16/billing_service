@@ -1,5 +1,4 @@
 from django.http import HttpRequest, HttpResponse
-
 from extensions.jwt.responses import HttpResponsesUNAUTHORIZED
 
 
@@ -18,8 +17,8 @@ def raw_decoded_jwt_user(decoded_jwt: dict) -> dict:
     return decoded_jwt
 
 
-def handle_unathorized(content: str = '') -> HttpResponse:
-    return HttpResponsesUNAUTHORIZED(content)
+def handle_unauthorized(error_content: str = '') -> HttpResponse:
+    return HttpResponsesUNAUTHORIZED(error_content)
 
 
 token_handlers = {
@@ -29,4 +28,4 @@ token_handlers = {
 
 user_handler = raw_decoded_jwt_user
 
-unathorized_handler = handle_unathorized
+unauthorized_handler = handle_unauthorized

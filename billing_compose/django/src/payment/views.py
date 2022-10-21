@@ -1,8 +1,9 @@
-from django.shortcuts import get_object_or_404, redirect
-from django.template.response import TemplateResponse
-from payments import get_payment_model, RedirectNeeded
-from django.shortcuts import render
 from decimal import Decimal
+
+from config import settings
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template.response import TemplateResponse
+from payments import RedirectNeeded, get_payment_model
 
 
 def payment_details(request, *args, **kwargs):
@@ -22,23 +23,19 @@ def payment_details(request, *args, **kwargs):
 
 
 def index(request):
-    if request.GET.get('buy_now_btn'):
-        print('Кнопка нажата', flush=True)
     return render(request, 'index.html')
 
 
 def create_payment(request):
     if request.method == 'GET':
-        Payment = get_payment_model()
-        payment = Payment.objects.create(
+        payment_model = get_payment_model()
+        payment = payment_model.objects.create(
             variant='stripe',
             description='Subscription',
-            total=Decimal(499),
-            tax=Decimal(0),
+            total=Decimal(settings.MONTH_SUBSCRIPTION_PRICE),
             currency='RUB',
             # todo добавить юзернейм пользователя
             billing_first_name='Some name',
         )
 
-        print(payment.transaction_id, flush=True)
         return redirect('payment_details', payment_id=payment.id)

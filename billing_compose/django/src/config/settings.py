@@ -123,3 +123,5 @@ PAYMENT_VARIANTS = {
         }
     )
 }
+
+MONTH_SUBSCRIPTION_PRICE = os.environ.get('MONTH_SUBSCRIPTION_PRICE')
