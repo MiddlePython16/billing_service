@@ -1,6 +1,6 @@
 from django.urls import path
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
-
+from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
+                                   SpectacularSwaggerView)
 from payment.api.v1.views.payment import PaymentCreateView
 
 urlpatterns = [
