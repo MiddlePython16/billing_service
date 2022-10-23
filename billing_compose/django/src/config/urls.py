@@ -15,12 +15,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import include, path
+
 from payment import views
 
 urlpatterns = [
-    path('', views.index, name='index'),
     path('admin/', admin.site.urls),
+
     path('payments/', include('payments.urls')),
+
+    path('', include('payment.urls')),
+
+    path('', views.index, name='index'),
     path('payment_details/<str:payment_id>/', views.payment_details, name='payment_details'),
     path('create_payment/', views.create_payment, name='create_payment'),
 ]

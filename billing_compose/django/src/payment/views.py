@@ -6,8 +6,8 @@ from django.template.response import TemplateResponse
 from payments import RedirectNeeded, get_payment_model
 
 
-def payment_details(request, *args, **kwargs):
-    payment_id = kwargs.get('payment_id')
+def payment_details(request, payment_id):
+    # payment_id = kwargs.get('payment_id')
     payment = get_object_or_404(get_payment_model(), id=payment_id)
 
     try:

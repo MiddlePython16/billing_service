@@ -17,7 +17,7 @@ def get_request(*args, **kwargs):
     raise NoRequestInstanceError('No request instance')
 
 
-def jwt_required(optional: bool = False):  # noqa: WPS231
+def jwt_required(optional: Optional[bool] = False):  # noqa: WPS231
     """
     Wrap your view function in it,
     and you will get current_user as a named argument of your view function.
@@ -48,7 +48,7 @@ def jwt_required(optional: bool = False):  # noqa: WPS231
     return func_wrapper
 
 
-def get_jwt_token(request) -> Optional[str]:
+def get_jwt_token(request: HttpRequest) -> Optional[str]:
     for item in settings.JWT_TOKEN_LOCATION:  # noqa: WPS110
         request_handler = token_handlers.get(item, None)
         if request_handler is None:
