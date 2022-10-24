@@ -2,12 +2,11 @@ import uuid
 from decimal import Decimal
 from typing import Iterable
 
+from config import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from payments import PurchasedItem
 from payments.models import BasePayment
-
-from config import settings
 
 
 class UUIDMixin(models.Model):
@@ -66,7 +65,7 @@ class ItemsToUsers(CreatedMixin, ModifiedMixin):
 class Price(models.Model):
     currency = models.TextField(_('currency'), choices=Currencies.choices)
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='prices')
-    value = models.DecimalField(_('value'), max_digits=9, decimal_places=2, default="0.0")
+    value = models.DecimalField(_('value'), max_digits=9, decimal_places=2, default='0.0')
 
     class Meta:
         db_table = 'billing\".\"prices_to_items'

@@ -1,7 +1,7 @@
 from payment.api.v1.serializers.payment import MutationPaymentSerializer
+from payment.api.v1.views.__base__ import CustomPaginator
 from payment.models import Payment
 from rest_framework import generics
-from payment.api.v1.views.__base__ import CustomPaginator
 
 
 class PaymentCreateView(generics.CreateAPIView):
@@ -15,7 +15,7 @@ class PaymentListView(generics.ListAPIView):
     pagination_class = CustomPaginator
 
 
-class PaymentRetrieve(generics.RetrieveAPIView):
+class PaymentRetrieveView(generics.RetrieveAPIView):
     serializer_class = MutationPaymentSerializer
     queryset = Payment.objects.all()
 

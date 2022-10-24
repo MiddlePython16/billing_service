@@ -1,8 +1,7 @@
-from rest_framework import generics
-
 from payment.api.v1.serializers.user import UserSerializer
 from payment.api.v1.views.__base__ import CustomPaginator
 from payment.models import User
+from rest_framework import generics
 
 
 class UserCreateView(generics.CreateAPIView):

@@ -1,8 +1,7 @@
-from rest_framework import generics
-
 from payment.api.v1.serializers.item import ItemSerializer
 from payment.api.v1.views.__base__ import CustomPaginator
 from payment.models import Item
+from rest_framework import generics
 
 
 class ItemCreateView(generics.CreateAPIView):

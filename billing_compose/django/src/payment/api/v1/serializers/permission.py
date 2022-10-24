@@ -1,6 +1,5 @@
-from rest_framework import serializers
-
 from payment.models import Permission
+from rest_framework import serializers
 
 
 class PermissionSerializer(serializers.ModelSerializer):

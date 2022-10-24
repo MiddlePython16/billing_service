@@ -1,6 +1,5 @@
-from rest_framework import serializers
-
 from payment.models import Price
+from rest_framework import serializers
 
 
 class PriceSerializer(serializers.ModelSerializer):

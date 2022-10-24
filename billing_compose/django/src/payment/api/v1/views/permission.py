@@ -1,8 +1,7 @@
-from rest_framework import generics
-
 from payment.api.v1.serializers.permission import PermissionSerializer
 from payment.api.v1.views.__base__ import CustomPaginator
 from payment.models import Permission
+from rest_framework import generics
 
 
 class PermissionCreateView(generics.CreateAPIView):
