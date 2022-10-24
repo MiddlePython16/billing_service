@@ -63,7 +63,7 @@ class ItemsToUsers(CreatedMixin, ModifiedMixin):
         db_table = 'billing\".\"items_to_users'
 
 
-class PricesToItems(models.Model):
+class Price(models.Model):
     currency = models.TextField(_('currency'), choices=Currencies.choices)
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='prices')
     value = models.DecimalField(_('value'), max_digits=9, decimal_places=2, default="0.0")

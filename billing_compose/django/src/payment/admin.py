@@ -5,7 +5,7 @@ from payment import models
 
 
 class PricesToItemsInline(admin.TabularInline):
-    model = models.PricesToItems
+    model = models.Price
     extra = 0
 
 
@@ -76,7 +76,7 @@ class PermissionAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
 
 
-@admin.register(models.PricesToItems)
+@admin.register(models.Price)
 class PricesToItemsAdmin(admin.ModelAdmin):
     search_fields = ('currency', 'id')
     list_filter = ('currency',)

@@ -1,9 +1,9 @@
 from rest_framework import serializers
 
-from payment.models import PricesToItems
+from payment.models import Price
 
 
 class PriceSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PricesToItems
+        model = Price
         fields = '__all__'
