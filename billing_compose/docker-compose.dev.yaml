@@ -3,7 +3,9 @@ services:
 
   postgres:
     container_name: postgres
-    image: postgres:14.2
+    build:
+      context: ./postgres
+      dockerfile: ./Dockerfile
     volumes:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - billing_db:/var/lib/postgresql/data

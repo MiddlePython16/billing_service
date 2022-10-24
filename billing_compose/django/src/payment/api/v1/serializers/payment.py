@@ -1,14 +1,14 @@
-from config import settings
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema_field
-from payment.models import Payment
 from rest_framework import serializers
+
+from config import settings
+from payment.models import Payment
 
 
 class MutationPaymentSerializer(serializers.ModelSerializer):
     pay_url = serializers.SerializerMethodField()
     variant = serializers.ChoiceField(settings.PAYMENT_VARIANTS)
-    currency = serializers.ChoiceField(settings.PAYMENT_CURRENCIES)
 
     @extend_schema_field(serializers.CharField())
     def get_pay_url(self, obj):
