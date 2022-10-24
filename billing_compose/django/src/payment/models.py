@@ -18,10 +18,10 @@ class UUIDMixin(models.Model):
 
 
 class Currencies(models.TextChoices):
-    RUB = 'RUB'
-    USD = 'USD'
-    EUR = 'EUR'
-    CNY = 'CNY'
+    RUB = 'RUB', 'RUB'
+    USD = 'USD', 'USD'
+    EUR = 'EUR', 'EUR'
+    CNY = 'CNY', 'CNY'
 
 
 class CreatedMixin(models.Model):
