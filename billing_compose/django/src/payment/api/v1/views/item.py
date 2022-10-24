@@ -1,11 +1,11 @@
-from payment.api.v1.serializers.item import ItemSerializer
+from payment.api.v1.serializers.item import ItemSerializer, MutationItemSerializer
 from payment.api.v1.views.__base__ import CustomPaginator
 from payment.models import Item
 from rest_framework import generics
 
 
 class ItemCreateView(generics.CreateAPIView):
-    serializer_class = ItemSerializer
+    serializer_class = MutationItemSerializer
     queryset = Item.objects.all()
 
 
@@ -21,7 +21,7 @@ class ItemRetrieveView(generics.RetrieveAPIView):
 
 
 class ItemUpdateView(generics.UpdateAPIView):
-    serializer_class = ItemSerializer
+    serializer_class = MutationItemSerializer
     queryset = Item.objects.all()
 
 
