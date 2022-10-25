@@ -1,30 +1,34 @@
-from payment.api.v1.serializers.item import ItemSerializer, MutationItemSerializer
+from rest_framework.viewsets import ModelViewSet
+
+from payment.api.__base__ import FlexibleSerializerMixin, NestedPathLookupMixin, CLDModelViewSet
+from payment.api.v1.serializers.item import ItemSerializer, MutationItemSerializer, MutationPermissionsToItemsSerializer
 from payment.api.v1.views.__base__ import CustomPaginator
-from payment.models import Item
-from rest_framework import generics
+from payment.models import Item, PermissionsToItems
 
 
-class ItemCreateView(generics.CreateAPIView):
-    serializer_class = MutationItemSerializer
-    queryset = Item.objects.all()
-
-
-class ItemListView(generics.ListAPIView):
-    serializer_class = ItemSerializer
+class ItemViewSet(FlexibleSerializerMixin, ModelViewSet):
+    serializers = {
+        'create': MutationItemSerializer,
+        'list': ItemSerializer,
+        'retrieve': ItemSerializer,
+        'update': MutationItemSerializer,
+        'partial_update': MutationItemSerializer,
+        'destroy': ItemSerializer,
+    }
     queryset = Item.objects.all()
     pagination_class = CustomPaginator
 
 
-class ItemRetrieveView(generics.RetrieveAPIView):
-    serializer_class = ItemSerializer
-    queryset = Item.objects.all()
+class PermissionToItemViewSet(FlexibleSerializerMixin, NestedPathLookupMixin, CLDModelViewSet):
+    serializers = {
+        'create': MutationPermissionsToItemsSerializer,
+        'list': MutationPermissionsToItemsSerializer,
+        'destroy': MutationPermissionsToItemsSerializer,
+    }
+    queryset = PermissionsToItems.objects.all()
 
+    lookup_field = 'permission_id'
+    lookup_url_kwarg = 'id'
 
-class ItemUpdateView(generics.UpdateAPIView):
-    serializer_class = MutationItemSerializer
-    queryset = Item.objects.all()
-
-
-class ItemDestroyView(generics.DestroyAPIView):
-    serializer_class = ItemSerializer
-    queryset = Item.objects.all()
+    lookup_nested_fields = ['item_id']
+    lookup_nested_url_kwargs = ['item_pk']

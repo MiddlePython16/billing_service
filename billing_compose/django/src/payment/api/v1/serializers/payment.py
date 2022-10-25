@@ -1,11 +1,13 @@
-from config import settings
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema_field
-from payment.models import Payment
 from rest_framework import serializers
 
+from config import settings
+from payment.api.v1.serializers.item import ItemSerializer
+from payment.models import Payment, Item, ItemsToPayments
 
-class MutationPaymentSerializer(serializers.ModelSerializer):
+
+class BasePaymentSerializer(serializers.ModelSerializer):
     pay_url = serializers.SerializerMethodField()
     variant = serializers.ChoiceField(settings.PAYMENT_VARIANTS)
 
@@ -24,3 +26,18 @@ class MutationPaymentSerializer(serializers.ModelSerializer):
                             'transaction_id',
                             'tax',
                             'status']
+
+
+class MutationPaymentSerializer(BasePaymentSerializer):
+    items = serializers.PrimaryKeyRelatedField(many=True, queryset=Item.objects.all())
+
+
+class PaymentSerializer(BasePaymentSerializer):
+    items = ItemSerializer(many=True)
+
+
+class MutationItemsToPaymentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ItemsToPayments
+        exclude = ['id']
+        optional_fields = ['payment_id']

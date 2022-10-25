@@ -1,12 +1,14 @@
 import uuid
+from datetime import datetime, timezone, timedelta
 from decimal import Decimal
 from typing import Iterable
 
-from config import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from payments import PurchasedItem
 from payments.models import BasePayment
+
+from config import settings
 
 
 class UUIDMixin(models.Model):
@@ -43,26 +45,40 @@ class ItemsToPayments(CreatedMixin):
 
     class Meta:
         db_table = 'billing\".\"items_to_payments'
+        constraints = [models.UniqueConstraint(
+            fields=['item_id', 'payment_id'],
+            name='item_payment_idx')]
 
 
-class PermissionsToItems(models.Model):
+class PermissionsToItems(UUIDMixin):
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE)
     permission_id = models.ForeignKey('Permission', on_delete=models.CASCADE)
 
     class Meta:
         db_table = 'billing\".\"permission_to_items'
+        constraints = [models.UniqueConstraint(
+            fields=['item_id', 'permission_id'],
+            name='item_permission_idx')]
 
 
-class ItemsToUsers(CreatedMixin, ModifiedMixin):
+class ItemsToUsers(CreatedMixin, ModifiedMixin, UUIDMixin):
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE)
     user_id = models.ForeignKey('User', on_delete=models.CASCADE)
-    expires = models.DateTimeField()
+    expires = models.DateTimeField(blank=True)
 
     class Meta:
         db_table = 'billing\".\"items_to_users'
+        constraints = [models.UniqueConstraint(
+            fields=['item_id', 'user_id'],
+            name='item_user_idx')]
+
+    def save(self, *args, **kwargs):
+        if self.expires is None:
+            self.expires = datetime.now(timezone.utc) + timedelta(seconds=self.item_id.length)
+        return super().save(*args, **kwargs)
 
 
-class Price(models.Model):
+class Price(UUIDMixin):
     currency = models.TextField(_('currency'), choices=Currencies.choices)
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE, related_name='prices')
     value = models.DecimalField(_('value'), max_digits=9, decimal_places=2, default='0.0')
@@ -71,6 +87,9 @@ class Price(models.Model):
         db_table = 'billing\".\"prices_to_items'
         verbose_name = _('Prices to items')
         verbose_name_plural = _('Prices to items')
+        constraints = [models.UniqueConstraint(
+            fields=['item_id', 'currency'],
+            name='item_price_currency_idx')]
 
     def __str__(self):
         return self.currency

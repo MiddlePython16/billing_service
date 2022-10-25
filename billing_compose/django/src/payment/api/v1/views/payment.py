@@ -1,30 +1,34 @@
-from payment.api.v1.serializers.payment import MutationPaymentSerializer
+from rest_framework.viewsets import ModelViewSet
+
+from payment.api.__base__ import FlexibleSerializerMixin, NestedPathLookupMixin, CLDModelViewSet
+from payment.api.v1.serializers.payment import MutationPaymentSerializer, MutationItemsToPaymentsSerializer
 from payment.api.v1.views.__base__ import CustomPaginator
-from payment.models import Payment
-from rest_framework import generics
+from payment.models import Payment, ItemsToPayments
 
 
-class PaymentCreateView(generics.CreateAPIView):
-    serializer_class = MutationPaymentSerializer
-    queryset = Payment.objects.all()
-
-
-class PaymentListView(generics.ListAPIView):
-    serializer_class = MutationPaymentSerializer
+class PaymentViewSet(FlexibleSerializerMixin, ModelViewSet):
+    serializers = {
+        'create': MutationPaymentSerializer,
+        'list': MutationPaymentSerializer,
+        'retrieve': MutationPaymentSerializer,
+        'update': MutationPaymentSerializer,
+        'partial_update': MutationPaymentSerializer,
+        'destroy': MutationPaymentSerializer,
+    }
     queryset = Payment.objects.all()
     pagination_class = CustomPaginator
 
 
-class PaymentRetrieveView(generics.RetrieveAPIView):
-    serializer_class = MutationPaymentSerializer
-    queryset = Payment.objects.all()
+class ItemToPaymentViewSet(FlexibleSerializerMixin, NestedPathLookupMixin, CLDModelViewSet):
+    serializers = {
+        'create': MutationItemsToPaymentsSerializer,
+        'list': MutationItemsToPaymentsSerializer,
+        'destroy': MutationItemsToPaymentsSerializer,
+    }
+    queryset = ItemsToPayments.objects.all()
 
+    lookup_field = 'item_id'
+    lookup_url_kwarg = 'id'
 
-class PaymentUpdateView(generics.UpdateAPIView):
-    serializer_class = MutationPaymentSerializer
-    queryset = Payment.objects.all()
-
-
-class PaymentDestroyView(generics.DestroyAPIView):
-    serializer_class = MutationPaymentSerializer
-    queryset = Payment.objects.all()
+    lookup_nested_fields = ['payment_id']
+    lookup_nested_url_kwargs = ['payment_pk']

@@ -1,32 +1,36 @@
-from django.urls import path
+from django.urls import path, include
 from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
                                    SpectacularSwaggerView)
-from payment.api.v1.views import item, payment, permission, user
+from rest_framework.routers import DefaultRouter
+from rest_framework_nested.routers import NestedDefaultRouter
+
+from payment.api.v1.views import item, payment, permission, user, price
+from payment.api.v1.views.item import PermissionToItemViewSet
+from payment.api.v1.views.payment import ItemToPaymentViewSet
+from payment.api.v1.views.user import ItemToUserViewSet
+
+router = DefaultRouter()
+router.register(r'items', item.ItemViewSet, basename='items')
+router.register(r'payments', payment.PaymentViewSet, basename='payments')
+router.register(r'permissions', permission.PermissionViewSet, basename='permissions')
+router.register(r'prices', price.PriceViewSet, basename='prices')
+router.register(r'users', user.UserViewSet, basename='users')
+
+users_router = NestedDefaultRouter(router, r'users', lookup='user')
+users_router.register(r'items', ItemToUserViewSet, basename='items_to_users')
+
+items_router = NestedDefaultRouter(router, r'items', lookup='item')
+items_router.register(r'permissions', PermissionToItemViewSet, basename='permissions_to_items')
+
+payments_router = NestedDefaultRouter(router, r'payments', lookup='payment')
+payments_router.register(r'items', ItemToPaymentViewSet, basename='items_to_payments')
 
 urlpatterns = [
-    path('payments/', payment.PaymentCreateView.as_view()),
-    path('payments/', payment.PaymentListView.as_view()),
-    path('payments/<uuid:pk>', payment.PaymentRetrieveView.as_view()),
-    path('payments/<uuid:pk>', payment.PaymentUpdateView.as_view()),
-    path('payments/<uuid:pk>', payment.PaymentDestroyView.as_view()),
+    path('', include(router.urls)),
 
-    path('items/', item.ItemCreateView.as_view()),
-    path('items/', item.ItemListView.as_view()),
-    path('items/<uuid:pk>', item.ItemRetrieveView.as_view()),
-    path('items/<uuid:pk>', item.ItemUpdateView.as_view()),
-    path('items/<uuid:pk>', item.ItemDestroyView.as_view()),
-
-    path('permissions/', permission.PermissionCreateView.as_view()),
-    path('permissions/', permission.PermissionListView.as_view()),
-    path('permissions/<uuid:pk>', permission.PermissionRetrieveView.as_view()),
-    path('permissions/<uuid:pk>', permission.PermissionUpdateView.as_view()),
-    path('permissions/<uuid:pk>', permission.PermissionDestroyView.as_view()),
-
-    path('users/', user.UserCreateView.as_view()),
-    path('users/', user.UserListView.as_view()),
-    path('users/<uuid:pk>', user.UserRetrieveView.as_view()),
-    path('users/<uuid:pk>', user.UserUpdateView.as_view()),
-    path('users/<uuid:pk>', user.UserDestroyView.as_view()),
+    path('', include(users_router.urls)),
+    path('', include(items_router.urls)),
+    path('', include(payments_router.urls)),
 
     path('schema/', SpectacularAPIView.as_view(), name='v1schema'),
     # Optional UI:
