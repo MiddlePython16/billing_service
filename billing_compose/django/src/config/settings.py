@@ -119,6 +119,9 @@ CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 STRIPE_PRIVATE_KEY = os.environ.get('STRIPE_PRIVATE_KEY')
 
+YOOKASSA_ACCOUNT_ID = os.environ.get('YOOKASSA_ACCOUNT_ID')
+YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
+
 PAYMENT_MODEL = 'payment.Payment'
 
 PAYMENT_VARIANTS = {
@@ -127,6 +130,13 @@ PAYMENT_VARIANTS = {
         {
             'secret_key': STRIPE_PRIVATE_KEY,
             'public_key': STRIPE_PUBLIC_KEY,
+        }
+    ),
+    'yookassa': (
+        'payment.providers.yookassa.YookassaProvider',
+        {
+            'account_id': YOOKASSA_ACCOUNT_ID,
+            'secret_key': YOOKASSA_SECRET_KEY,
         }
     ),
     'dummy': (
