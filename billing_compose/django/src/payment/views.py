@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from payments import RedirectNeeded, get_payment_model
 
+from payment.models import Currencies, Item, User
+
 
 def payment_details(request, payment_id):
     payment = get_object_or_404(get_payment_model(), id=payment_id)
@@ -29,12 +31,19 @@ def create_payment(request):
     if request.method == 'GET':
         payment_model = get_payment_model()
         payment = payment_model.objects.create(
-            variant='stripe',
+            variant='yookassa',
+            user_id=User.objects.get(),
+            currency=Currencies.RUB,
             description='Subscription',
-            total=Decimal(settings.MONTH_SUBSCRIPTION_PRICE),
-            currency='RUB',
-            # todo добавить юзернейм пользователя
-            billing_first_name='Some name',
+            total=199.00,
         )
-
         return redirect('payment_details', payment_id=payment.id)
+
+
+def payment_success(request):
+    return render(request, 'thanks.html')
+
+
+def payment_failure(request):
+    # change on failure.html
+    return render(request, 'thanks.html')

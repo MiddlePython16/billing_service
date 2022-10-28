@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_extensions',
+
     'rest_framework',
     'drf_spectacular',
     'django_filters',
@@ -153,8 +155,8 @@ PAYMENT_CURRENCIES = [
     'RUB',
 
 ]
-PAYMENT_HOST = '*'
-PAYMENT_USES_SSL = False
+PAYMENT_HOST = os.environ.get('PAYMENT_HOST')
+PAYMENT_USES_SSL = os.environ.get('PAYMENT_USES_SSL')
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',

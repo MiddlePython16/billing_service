@@ -1,14 +1,16 @@
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Iterable
-
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from payments import PurchasedItem
-from payments.models import BasePayment
+from urllib.parse import urljoin
 
 from config import settings
+from django.db import models
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+from payments import PurchasedItem
+from payments.core import get_base_url
+from payments.models import BasePayment
 
 
 class UUIDMixin(models.Model):
@@ -135,13 +137,13 @@ class User(UUIDMixin):
 class Payment(BasePayment, UUIDMixin):
     user_id = models.ForeignKey('User', on_delete=models.CASCADE)
     currency = models.TextField(_('currency'), choices=Currencies.choices)
-    items = models.ManyToManyField(Item, through='ItemsToPayments')
+    # items = models.ManyToManyField(Item, through='ItemsToPayments')
 
     def get_failure_url(self) -> str:
-        return f'http://example.com/payments/{self.pk}/failure'
+        return urljoin(get_base_url(), reverse('payment_failure'))
 
     def get_success_url(self) -> str:
-        return f'http://example.com/payments/{self.pk}/success'
+        return urljoin(get_base_url(), reverse('payment_success'))
 
     def get_purchased_items(self) -> Iterable[PurchasedItem]:
         # todo стоит переписать
