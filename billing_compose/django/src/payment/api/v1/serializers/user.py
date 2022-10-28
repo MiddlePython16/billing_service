@@ -21,6 +21,14 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class MutationItemsToUsersSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        if self.Meta.model.objects.filter(item_id=validated_data['item_id'],
+                                          user_id=validated_data['user_id']).first() is not None:
+            raise serializers.ValidationError('User already have this item')
+
+        return super().create(validated_data)
+
     class Meta:
         model = ItemsToUsers
         exclude = ['id']

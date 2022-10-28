@@ -13,7 +13,7 @@ class BasePaymentSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.CharField())
     def get_pay_url(self, obj):
-        return f'{reverse("payment_details")}/{obj.id}'
+        return reverse("payment_details", obj.id)
 
     class Meta:
         model = Payment
@@ -37,6 +37,14 @@ class PaymentSerializer(BasePaymentSerializer):
 
 
 class MutationItemsToPaymentsSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        if self.Meta.model.objects.filter(item_id=validated_data['item_id'],
+                                          user_id=validated_data['payment_id']).first() is not None:
+            raise serializers.ValidationError('Payment already have this item')
+
+        return super().create(validated_data)
+
     class Meta:
         model = ItemsToPayments
         exclude = ['id']

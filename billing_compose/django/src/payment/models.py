@@ -133,7 +133,7 @@ class User(UUIDMixin):
 
 
 class Payment(BasePayment, UUIDMixin):
-    user_id = models.ForeignKey('User', on_delete=models.CASCADE)
+    user_id = models.ForeignKey('User', on_delete=models.CASCADE, related_name='payments')
     currency = models.TextField(_('currency'), choices=Currencies.choices)
     items = models.ManyToManyField(Item, through='ItemsToPayments')
 
