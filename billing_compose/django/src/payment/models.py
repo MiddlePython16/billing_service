@@ -6,6 +6,8 @@ from urllib.parse import urljoin
 
 from config import settings
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from payments import PurchasedItem
@@ -158,3 +160,10 @@ class Payment(BasePayment, UUIDMixin):
 
     class Meta:
         db_table = 'billing\".\"payments'
+
+
+@receiver(post_save, sender=Payment)
+def on_change(sender, instance, created, *args, **kwargs):
+    if not created and instance.status == 'confirmed':
+        for item in instance.items.all():
+            ItemsToUsers.objects.create(item_id=item, user_id=instance.user_id)

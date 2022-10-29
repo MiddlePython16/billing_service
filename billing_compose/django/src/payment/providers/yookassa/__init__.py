@@ -62,7 +62,6 @@ class YookassaProvider(BasicProvider):
     def get_form(self, payment: BasePayment, data=None):
         if payment.status == PaymentStatus.WAITING:
             payment_data, confirmation_needed_flag = self._create_payment(payment)
-            print('[get_form]:', payment_data.json())
             if confirmation_needed_flag:
                 raise RedirectNeeded(payment_data.confirmation.confirmation_url)
             else:
@@ -84,15 +83,12 @@ class YookassaProvider(BasicProvider):
         current_event = notification_object.event
         current_payment = notification_object.object
 
-        print('[process_data]:', current_event)
-
-        if current_event == 'payment.succeeded':
+        if current_event == 'payment.succeeded' and current_payment.amount.value == payment.total:
             payment.change_status(PaymentStatus.CONFIRMED)
             if current_payment.payment_method.saved == True:
-                payment_method_id = User.objects.get(id=payment.user_id.id).payment_method_id
-                print('[process_data]:', current_payment.json())
+                payment_method_id = payment.user_id.payment_method_id
                 if not payment_method_id:
-                    user = User.objects.get(id=payment.user_id.id)
+                    user = payment.user_id
                     user.payment_method_id = current_payment.payment_method.id
                     user.save()
 
