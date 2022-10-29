@@ -1,6 +1,5 @@
 import json
 import uuid
-from urllib.parse import urljoin
 
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import redirect
@@ -29,7 +28,7 @@ class YookassaProvider(BasicProvider):
             },
             "confirmation": {
                 "type": "redirect",
-                "return_url": urljoin(get_base_url(), reverse('static_process_payment', kwargs={'variant': payment.variant})),
+                "return_url": get_base_url(),
             },
             "capture": True,
             "description": payment.description,
@@ -39,16 +38,9 @@ class YookassaProvider(BasicProvider):
         }, uuid.uuid4())
 
     def get_form(self, payment: BasePayment, data=None):
-        print('[get_form]:', payment.status)
         if payment.status == PaymentStatus.WAITING:
             payment_data = self._create_payment(payment)
             raise RedirectNeeded(payment_data.confirmation.confirmation_url)
-
-        if payment.status == PaymentStatus.CONFIRMED:
-            raise RedirectNeeded(payment.get_success_url())
-
-        if payment.status == PaymentStatus.REJECTED:
-            raise RedirectNeeded(payment.get_failure_url())
 
     def get_token_from_request(self, payment: BasePayment, request: HttpRequest):
         payload = json.loads(request.body)
@@ -57,9 +49,6 @@ class YookassaProvider(BasicProvider):
         return current_payment.metadata['token']
 
     def process_data(self, payment: BasePayment, request: HttpRequest):
-        success_url = payment.get_success_url()
-        failure_url = payment.get_failure_url()
-
         payload = json.loads(request.body)
         try:
             notification_object = WebhookNotification(payload)
@@ -73,10 +62,8 @@ class YookassaProvider(BasicProvider):
 
         if current_event == 'payment.succeeded':
             payment.change_status(PaymentStatus.CONFIRMED)
-            redirect(payment.get_success_url())
 
         if current_event == 'payment.canceled':
             payment.change_status(PaymentStatus.REJECTED)
-            redirect(payment.get_failure_url())
 
         return HttpResponse(status=200)
