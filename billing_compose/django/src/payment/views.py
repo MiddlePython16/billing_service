@@ -5,7 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from payments import RedirectNeeded, get_payment_model
 
-from payment.models import Currencies, Item, User
+from payment.models import Item, Price, User
 
 
 def payment_details(request, payment_id):
@@ -35,9 +35,9 @@ def create_payment(request):
         payment = payment_model.objects.create(
             variant='yookassa',
             user_id=User.objects.get(),
-            currency=Currencies.RUB,
+            currency=Price.objects.get(item_id=item.id).currency,
             description='Subscription',
-            total=199.00,
+            total=Price.objects.get(item_id=item.id).value,
         )
         payment.items.add(item)
         return redirect('payment_details', payment_id=payment.id)
