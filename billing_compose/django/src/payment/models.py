@@ -127,6 +127,7 @@ class Item(UUIDMixin):
 
 class User(UUIDMixin):
     items = models.ManyToManyField(Item, through='ItemsToUsers')
+    payment_method_id = models.UUIDField(blank=True, null=True)
 
     class Meta:
         db_table = 'billing\".\"users'
@@ -137,7 +138,7 @@ class User(UUIDMixin):
 class Payment(BasePayment, UUIDMixin):
     user_id = models.ForeignKey('User', on_delete=models.CASCADE)
     currency = models.TextField(_('currency'), choices=Currencies.choices)
-    # items = models.ManyToManyField(Item, through='ItemsToPayments')
+    items = models.ManyToManyField(Item, through='ItemsToPayments')
 
     def get_failure_url(self) -> str:
         return urljoin(get_base_url(), reverse('payment_failure'))

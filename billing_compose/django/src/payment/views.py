@@ -29,6 +29,8 @@ def index(request):
 
 def create_payment(request):
     if request.method == 'GET':
+        item = Item.objects.get(name='base')
+
         payment_model = get_payment_model()
         payment = payment_model.objects.create(
             variant='yookassa',
@@ -37,6 +39,7 @@ def create_payment(request):
             description='Subscription',
             total=199.00,
         )
+        payment.items.add(item)
         return redirect('payment_details', payment_id=payment.id)
 
 
