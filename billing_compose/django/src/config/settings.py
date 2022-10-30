@@ -6,7 +6,6 @@ from split_settings.tools import include
 
 load_dotenv()
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 include(
@@ -18,8 +17,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', False) == 'True'
 
-ALLOWED_HOSTS = ['127.0.0.1']
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -31,8 +29,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
+    'drf_spectacular',
+    'django_filters',
+    'corsheaders',
+    'payments',
 
     'payment.apps.PaymentConfig',
+
 ]
 
 MIDDLEWARE = [
@@ -65,7 +69,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
 
@@ -84,7 +87,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -95,7 +97,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
@@ -108,10 +109,51 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
 REDIS_HOST = os.environ.get('REDIS_HOST')
 REDIS_PORT = os.environ.get('REDIS_PORT')
 
 JWT_PUBLIC_KEY = os.environ.get('JWT_PUBLIC_KEY')
 JWT_TOKEN_LOCATION = ['headers', 'cookies']
 CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+
+STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
+STRIPE_PRIVATE_KEY = os.environ.get('STRIPE_PRIVATE_KEY')
+
+PAYMENT_MODEL = 'payment.Payment'
+
+PAYMENT_VARIANTS = {
+    'stripe': (
+        'payments.stripe.StripeCardProvider',
+        {
+            'secret_key': STRIPE_PRIVATE_KEY,
+            'public_key': STRIPE_PUBLIC_KEY,
+        }
+    ),
+    'dummy': (
+        'payments.dummy.DummyProvider',
+        {
+
+        }
+    )
+}
+
+MONTH_SUBSCRIPTION_PRICE = os.environ.get('MONTH_SUBSCRIPTION_PRICE')
+
+PAYMENT_CURRENCIES = [
+    'RUB',
+
+]
+PAYMENT_HOST = '*'
+PAYMENT_USES_SSL = False
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Your Project API',
+    'DESCRIPTION': 'Your project description',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    # OTHER SETTINGS
+}

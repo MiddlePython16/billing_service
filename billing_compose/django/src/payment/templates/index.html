@@ -1,0 +1,22 @@
+{% load static %}
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Store</title>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="jumbotron">
+        <h1 class="display-3">The Product</h1>
+        <p class="lead">Purchase The Product for only $99.</p>
+        <a class="btn btn-primary" href="{% url 'create_payment'%}">Pay</a>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; Store 2017</p>
+    </footer>
+</div>
+</body>
+</html>

@@ -2,7 +2,9 @@ version: "3.9"
 services:
 
   postgres:
-    image: postgres:14.2
+    build:
+      context: ./postgres
+      dockerfile: ./Dockerfile
     volumes:
       - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
       - billing_db:/var/lib/postgresql/data
@@ -24,7 +26,7 @@ services:
     build:
       context: ./django
       dockerfile: ./Dockerfile
-    command: sh -c "python manage.py migrate && python manage.py collectstatic --no-input && gunicorn config.wsgi -b 0.0.0.0:8000 --timeout 900 --chdir=/code"
+    command: sh -c "sleep 5 && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn config.wsgi -b 0.0.0.0:8000 --timeout 900 --chdir=/code"
     volumes:
       - static:/code/static
     env_file:
