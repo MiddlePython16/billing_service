@@ -1,20 +1,18 @@
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Iterable
 from urllib.parse import urljoin
 
-from config import settings
 from dateutil.relativedelta import relativedelta
 from django.db import models
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from payments import PurchasedItem
 from payments.core import get_base_url
 from payments.models import BasePayment
-from payments.signals import status_changed
+
+from config import settings
 
 
 class UUIDMixin(models.Model):
@@ -79,7 +77,7 @@ class ItemsToUsers(CreatedMixin, ModifiedMixin, UUIDMixin):
             name='item_user_idx')]
 
     def save(self, *args, **kwargs):
-        if self.expires is None:
+        if self.expires is None and self.item_id.expirable:
             self.expires = datetime.now(timezone.utc) + relativedelta(months=self.item_id.length)
         return super().save(*args, **kwargs)
 
@@ -162,10 +160,3 @@ class Payment(BasePayment, UUIDMixin):
 
     class Meta:
         db_table = 'billing\".\"payments'
-
-
-@receiver(status_changed)
-def on_status_changed(sender, instance, **kwargs):
-    if instance.status == 'confirmed':
-        for item in instance.items.all():
-            ItemsToUsers.objects.create(item_id=item, user_id=instance.user_id)

@@ -149,14 +149,8 @@ PAYMENT_VARIANTS = {
     )
 }
 
-MONTH_SUBSCRIPTION_PRICE = os.environ.get('MONTH_SUBSCRIPTION_PRICE')
-
-PAYMENT_CURRENCIES = [
-    'RUB',
-
-]
-PAYMENT_HOST = os.environ.get('PAYMENT_HOST')
-PAYMENT_USES_SSL = os.environ.get('PAYMENT_USES_SSL')
+PAYMENT_HOST = os.environ.get('PAYMENT_HOST', 'localhost')
+PAYMENT_USES_SSL = os.environ.get('PAYMENT_USES_SSL', False)
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -169,3 +163,5 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
 }
+
+AUTH_URL = os.environ.get('AUTH_URL', '127.0.0.1')
