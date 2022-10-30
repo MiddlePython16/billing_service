@@ -29,5 +29,6 @@ urlpatterns = [
     path('create_payment/', views.create_payment, name='create_payment'),
     path('payment_success/', views.payment_success, name='payment_success'),
     path('payment_failure/', views.payment_failure, name='payment_failure'),
+    path('refund_payment/<uuid:id>', views.refund_payment, name='refund_payment'),
 
 ]

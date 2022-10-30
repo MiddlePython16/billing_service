@@ -168,4 +168,7 @@ class Payment(BasePayment, UUIDMixin):
 def on_status_changed(sender, instance, **kwargs):
     if instance.status == 'confirmed':
         for item in instance.items.all():
-            ItemsToUsers.objects.create(item_id=item, user_id=instance.user_id)
+            try:
+                ItemsToUsers.objects.create(item_id=item, user_id=instance.user_id)
+            except Exception as e:
+                print(e)

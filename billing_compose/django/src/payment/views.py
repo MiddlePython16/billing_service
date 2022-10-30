@@ -1,6 +1,6 @@
 from decimal import Decimal
 
-from config import settings
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from payments import RedirectNeeded, get_payment_model
@@ -34,13 +34,20 @@ def create_payment(request):
         payment_model = get_payment_model()
         payment = payment_model.objects.create(
             variant='yookassa',
-            user_id=User.objects.get(),
+            user_id=User.objects.create(),
             currency=Price.objects.get(item_id=item.id).currency,
             description='Subscription',
             total=Price.objects.get(item_id=item.id).value,
         )
         payment.items.add(item)
         return redirect('payment_details', payment_id=payment.id)
+
+
+def refund_payment(request, id):
+    payment_model = get_payment_model()
+    payment = payment_model.objects.get(id=id)
+    payment.refund(amount=payment.total)
+    return HttpResponse(status=200)
 
 
 def payment_success(request):

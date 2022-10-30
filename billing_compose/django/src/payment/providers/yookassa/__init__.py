@@ -10,6 +10,7 @@ from payments.models import BasePayment
 
 from yookassa import Configuration
 from yookassa import Payment as YookassaPayment
+from yookassa import Refund
 from yookassa.domain.notification import WebhookNotification
 from yookassa.domain.response import PaymentResponse
 
@@ -62,6 +63,8 @@ class YookassaProvider(BasicProvider):
     def get_form(self, payment: BasePayment, data=None):
         if payment.status == PaymentStatus.WAITING:
             payment_data, confirmation_needed_flag = self._create_payment(payment)
+            payment.transaction_id = payment_data.id
+            payment.save()
             if confirmation_needed_flag:
                 raise RedirectNeeded(payment_data.confirmation.confirmation_url)
             else:
@@ -71,7 +74,7 @@ class YookassaProvider(BasicProvider):
         payload = json.loads(request.body)
         notification_object = WebhookNotification(payload)
         current_payment = notification_object.object
-        return current_payment.metadata['token']
+        return current_payment.metadata.get('token')
 
     def process_data(self, payment: BasePayment, request: HttpRequest):
         payload = json.loads(request.body)
@@ -84,6 +87,8 @@ class YookassaProvider(BasicProvider):
         current_payment = notification_object.object
 
         if current_event == 'payment.succeeded' and current_payment.amount.value == payment.total:
+            payment.captured_amount = current_payment.amount.value
+            payment.save()
             payment.change_status(PaymentStatus.CONFIRMED)
             if current_payment.payment_method.saved == True:
                 payment_method_id = payment.user_id.payment_method_id
@@ -96,3 +101,21 @@ class YookassaProvider(BasicProvider):
             payment.change_status(PaymentStatus.REJECTED)
 
         return HttpResponse(status=200)
+
+    def refund(self, payment: BasePayment, amount: int = None) -> int:
+        amount = int(amount or payment.total)
+        try:
+            refund = Refund.create({
+                "amount": {
+                    "value": amount,
+                    "currency": payment.currency
+                },
+                "payment_id": payment.transaction_id
+            })
+        except Exception as e:
+            print(e)
+        else:
+            print('[refund]:', refund.json())
+            if refund.status != 'succeeded':
+                amount = 0
+        return amount
