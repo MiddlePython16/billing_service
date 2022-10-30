@@ -1,11 +1,10 @@
-from decimal import Decimal
-
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from payments import RedirectNeeded, get_payment_model
 
 from payment.models import Item, Price, User
+from payment.utils.utils import get_json_from_permissions
 
 
 def payment_details(request, payment_id):
@@ -57,3 +56,8 @@ def payment_success(request):
 def payment_failure(request):
     # change on failure.html
     return render(request, 'thanks.html')
+
+
+def get_json_blob(request, user_id):
+    user = User.objects.get(id=user_id)
+    return HttpResponse(str({'permissions': get_json_from_permissions(user.items.all())}))
