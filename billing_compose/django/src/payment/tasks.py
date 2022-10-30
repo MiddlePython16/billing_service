@@ -1,6 +1,44 @@
+from datetime import date, datetime
+
 from celery import shared_task
+from celery.utils.log import get_task_logger
+from django.shortcuts import redirect
+from payments import PaymentStatus, get_payment_model
+
+from payment.models import Item, ItemsToUsers, Payment, Price
+
+logger = get_task_logger(__name__)
 
 
 @shared_task
-def test_task():
-    return 'Ok!'
+def check_not_paid_task() -> None:
+    for payment in Payment.objects.filter(paid__isnull=True):
+        logger.info(
+            f'Send notification to user({payment .user_id}) for continue to pay his subscription')
+
+
+@shared_task
+def remove_not_paid_task() -> None:
+    result = Payment.objects.filter(status=PaymentStatus.WAITING).delete()
+    logger.info(f'removed {result} objects')
+
+
+@shared_task
+def auto_pay() -> None:
+    logger.info('### AUTO PAY! ###')
+    items_to_users = ItemsToUsers.objects.filter(expires__date=datetime.today()):
+    logger.info(f'items_to_users: {items_to_users}')
+    for items_to_user in items_to_users:
+        item_id = items_to_user.item_id
+        user_id = items_to_user.user_id
+        # create_payment
+        payment_model = get_payment_model()
+        payment = payment_model.objects.create(
+            variant='yookassa',
+            user_id=user_id,
+            currency=Price.objects.get(item_id=item_id).currency,
+            description='Subscription',
+            total=Price.objects.get(item_id=item_id).value,
+        )
+        payment.items.add(items_to_user.item_id)
+        return redirect('payment_details', payment_id=payment.id)

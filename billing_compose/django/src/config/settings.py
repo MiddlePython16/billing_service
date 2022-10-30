@@ -4,6 +4,8 @@ from pathlib import Path
 from dotenv import load_dotenv
 from split_settings.tools import include
 
+from celery.schedules import crontab
+
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -116,7 +118,18 @@ REDIS_PORT = os.environ.get('REDIS_PORT')
 
 JWT_PUBLIC_KEY = os.environ.get('JWT_PUBLIC_KEY')
 JWT_TOKEN_LOCATION = ['headers', 'cookies']
+
 CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
+CELERY_BEAT_SCHEDULE = {
+    'remove_not_paid': {
+        'task': 'payment.tasks.remove_not_paid_task',
+        'schedule': crontab(hour=0)
+    },
+    'auto_pay': {
+        'task': 'payment.tasks.auto_pay',
+        'schedule': crontab(hour=1)
+    }
+}
 
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 STRIPE_PRIVATE_KEY = os.environ.get('STRIPE_PRIVATE_KEY')
