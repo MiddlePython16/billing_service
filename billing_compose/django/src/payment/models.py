@@ -1,14 +1,17 @@
 import uuid
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from decimal import Decimal
 from typing import Iterable
-
-from django.db import models
-from django.utils.translation import gettext_lazy as _
-from payments import PurchasedItem
-from payments.models import BasePayment
+from urllib.parse import urljoin
 
 from config import settings
+from dateutil.relativedelta import relativedelta
+from django.db import models
+from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
+from payments import PurchasedItem
+from payments.core import get_base_url
+from payments.models import BasePayment
 
 
 class UUIDMixin(models.Model):
@@ -73,8 +76,8 @@ class ItemsToUsers(CreatedMixin, ModifiedMixin, UUIDMixin):
             name='item_user_idx')]
 
     def save(self, *args, **kwargs):
-        if self.expires is None:
-            self.expires = datetime.now(timezone.utc) + timedelta(seconds=self.item_id.length)
+        if self.expires is None and self.item_id.expirable:
+            self.expires = datetime.now(timezone.utc) + relativedelta(months=self.item_id.length)
         return super().save(*args, **kwargs)
 
 
@@ -125,6 +128,7 @@ class Item(UUIDMixin):
 
 class User(UUIDMixin):
     items = models.ManyToManyField(Item, through='ItemsToUsers')
+    payment_method_id = models.UUIDField(blank=True, null=True)
 
     class Meta:
         db_table = 'billing\".\"users'
@@ -138,10 +142,10 @@ class Payment(BasePayment, UUIDMixin):
     items = models.ManyToManyField(Item, through='ItemsToPayments')
 
     def get_failure_url(self) -> str:
-        return f'http://example.com/payments/{self.pk}/failure'
+        return urljoin(get_base_url(), reverse('payment_failure'))
 
     def get_success_url(self) -> str:
-        return f'http://example.com/payments/{self.pk}/success'
+        return urljoin(get_base_url(), reverse('payment_success'))
 
     def get_purchased_items(self) -> Iterable[PurchasedItem]:
         # todo стоит переписать

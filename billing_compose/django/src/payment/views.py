@@ -1,9 +1,10 @@
-from decimal import Decimal
-
-from config import settings
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
 from payments import RedirectNeeded, get_payment_model
+
+from payment.models import Item, Price, User
+from payment.utils.utils import get_json_from_permissions
 
 
 def payment_details(request, payment_id):
@@ -27,14 +28,36 @@ def index(request):
 
 def create_payment(request):
     if request.method == 'GET':
+        item = Item.objects.get(name='base')
+
         payment_model = get_payment_model()
         payment = payment_model.objects.create(
-            variant='stripe',
+            variant='yookassa',
+            user_id=User.objects.create(),
+            currency=Price.objects.get(item_id=item.id).currency,
             description='Subscription',
-            total=Decimal(settings.MONTH_SUBSCRIPTION_PRICE),
-            currency='RUB',
-            # todo добавить юзернейм пользователя
-            billing_first_name='Some name',
+            total=Price.objects.get(item_id=item.id).value,
         )
-
+        payment.items.add(item)
         return redirect('payment_details', payment_id=payment.id)
+
+
+def refund_payment(request, id):
+    payment_model = get_payment_model()
+    payment = payment_model.objects.get(id=id)
+    payment.refund(amount=payment.total)
+    return HttpResponse(status=200)
+
+
+def payment_success(request):
+    return render(request, 'thanks.html')
+
+
+def payment_failure(request):
+    # change on failure.html
+    return render(request, 'thanks.html')
+
+
+def get_json_blob(request, user_id):
+    user = User.objects.get(id=user_id)
+    return HttpResponse(str({'permissions': get_json_from_permissions(user.items.all())}))

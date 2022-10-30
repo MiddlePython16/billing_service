@@ -29,6 +29,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'django_extensions',
+
     'rest_framework',
     'drf_spectacular',
     'django_filters',
@@ -119,6 +121,9 @@ CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}'
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
 STRIPE_PRIVATE_KEY = os.environ.get('STRIPE_PRIVATE_KEY')
 
+YOOKASSA_ACCOUNT_ID = os.environ.get('YOOKASSA_ACCOUNT_ID')
+YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
+
 PAYMENT_MODEL = 'payment.Payment'
 
 PAYMENT_VARIANTS = {
@@ -129,6 +134,13 @@ PAYMENT_VARIANTS = {
             'public_key': STRIPE_PUBLIC_KEY,
         }
     ),
+    'yookassa': (
+        'payment.providers.yookassa.YookassaProvider',
+        {
+            'account_id': YOOKASSA_ACCOUNT_ID,
+            'secret_key': YOOKASSA_SECRET_KEY,
+        }
+    ),
     'dummy': (
         'payments.dummy.DummyProvider',
         {
@@ -137,14 +149,8 @@ PAYMENT_VARIANTS = {
     )
 }
 
-MONTH_SUBSCRIPTION_PRICE = os.environ.get('MONTH_SUBSCRIPTION_PRICE')
-
-PAYMENT_CURRENCIES = [
-    'RUB',
-
-]
-PAYMENT_HOST = '*'
-PAYMENT_USES_SSL = False
+PAYMENT_HOST = os.environ.get('PAYMENT_HOST', 'localhost')
+PAYMENT_USES_SSL = os.environ.get('PAYMENT_USES_SSL', False)
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -157,3 +163,5 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
     # OTHER SETTINGS
 }
+
+AUTH_URL = os.environ.get('AUTH_URL', '127.0.0.1')
