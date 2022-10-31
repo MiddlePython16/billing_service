@@ -13,3 +13,8 @@ DATABASES = {
         }
     }
 }
+
+KAFKA_HOST = os.environ.get('KAFKA_HOST', '127.0.0.1')
+KAFKA_PORT = os.environ.get('KAFKA_PORT', 9092)
+
+

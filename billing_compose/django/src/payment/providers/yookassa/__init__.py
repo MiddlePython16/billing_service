@@ -24,7 +24,7 @@ class YookassaProvider(BasicProvider):
         super().__init__(**kwargs)
 
     def _create_payment(self, payment: Payment) -> PaymentResponse:
-        payment_method_id = User.objects.get(id=payment.user_id.id).payment_method_id
+        payment_method_id = payment.user_id.payment_method_id
         if payment_method_id:
             params = {
                 "amount": {
@@ -58,7 +58,7 @@ class YookassaProvider(BasicProvider):
                 "save_payment_method": True
             }
             confirmation_needed_flag = True
-        return (YookassaPayment.create(params, uuid.uuid4()), confirmation_needed_flag)
+        return YookassaPayment.create(params, uuid.uuid4()), confirmation_needed_flag
 
     def get_form(self, payment: BasePayment, data=None):
         if payment.status == PaymentStatus.WAITING:
@@ -90,7 +90,7 @@ class YookassaProvider(BasicProvider):
             payment.captured_amount = current_payment.amount.value
             payment.save()
             payment.change_status(PaymentStatus.CONFIRMED)
-            if current_payment.payment_method.saved == True:
+            if current_payment.payment_method.saved:
                 payment_method_id = payment.user_id.payment_method_id
                 if not payment_method_id:
                     user = payment.user_id

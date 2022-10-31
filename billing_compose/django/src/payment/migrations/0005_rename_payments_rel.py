@@ -7,7 +7,7 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('payment', '0003_alter_itemstousers_expires'),
+        ('payment', '0004_user_payment_method_id'),
     ]
 
     operations = [
