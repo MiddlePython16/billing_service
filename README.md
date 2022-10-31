@@ -18,6 +18,7 @@
 - [Александр](https://github.com/askalach)
 
 # Описание сервиса
+[Схема API](https://app.swaggerhub.com/apis/Wiped-Out/Billing_Service/1.0.0#/)
 
 ## Схема
 
