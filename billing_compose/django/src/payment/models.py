@@ -4,14 +4,15 @@ from decimal import Decimal
 from typing import Iterable
 from urllib.parse import urljoin
 
-from config import settings
 from dateutil.relativedelta import relativedelta
 from django.db import models
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from payments import PurchasedItem
-from payments.core import get_base_url
+from payments.core import get_base_url, provider_factory
 from payments.models import BasePayment
+
+from config import settings
 
 
 class UUIDMixin(models.Model):
@@ -68,6 +69,7 @@ class ItemsToUsers(CreatedMixin, ModifiedMixin, UUIDMixin):
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE)
     user_id = models.ForeignKey('User', on_delete=models.CASCADE)
     expires = models.DateTimeField(blank=True)
+    renewable = models.BooleanField(_('renewable'), blank=True)
 
     class Meta:
         db_table = 'billing\".\"items_to_users'
@@ -78,6 +80,8 @@ class ItemsToUsers(CreatedMixin, ModifiedMixin, UUIDMixin):
     def save(self, *args, **kwargs):
         if self.expires is None and self.item_id.expirable:
             self.expires = datetime.now(timezone.utc) + relativedelta(months=self.item_id.length)
+        self.renewable = self.expires is not None
+
         return super().save(*args, **kwargs)
 
 
@@ -147,13 +151,17 @@ class Payment(BasePayment, UUIDMixin):
     def get_success_url(self) -> str:
         return urljoin(get_base_url(), reverse('payment_success'))
 
+    def proceed_auto_payment(self, data=None):
+        provider = provider_factory(self.variant, self)
+        return provider.proceed_auto_payment(self, data=data)
+
     def get_purchased_items(self) -> Iterable[PurchasedItem]:
         # todo стоит переписать
         yield PurchasedItem(
             name='Subscription',
             sku='sbs',
             quantity=1,
-            price=Decimal(settings.MONTH_SUBSCRIPTION_PRICE),
+            price=Decimal(1),
             currency='RUB',
         )
 

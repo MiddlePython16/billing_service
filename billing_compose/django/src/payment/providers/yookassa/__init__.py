@@ -1,18 +1,17 @@
 import json
 import uuid
-from xml.etree.ElementTree import QName
 
 from django.http import HttpRequest, HttpResponse
-from payment.models import Payment, User
 from payments import PaymentStatus, RedirectNeeded
 from payments.core import BasicProvider, get_base_url
 from payments.models import BasePayment
-
 from yookassa import Configuration
 from yookassa import Payment as YookassaPayment
 from yookassa import Refund
 from yookassa.domain.notification import WebhookNotification
 from yookassa.domain.response import PaymentResponse
+
+from payment.models import Payment
 
 
 class YookassaProvider(BasicProvider):
@@ -69,6 +68,12 @@ class YookassaProvider(BasicProvider):
                 raise RedirectNeeded(payment_data.confirmation.confirmation_url)
             else:
                 raise RedirectNeeded(get_base_url())
+
+    def proceed_auto_payment(self, payment: BasePayment, data=None):
+        if payment.status == PaymentStatus.WAITING:
+            payment_data, confirmation_needed_flag = self._create_payment(payment)
+            payment.transaction_id = payment_data.id
+            payment.save()
 
     def get_token_from_request(self, payment: BasePayment, request: HttpRequest):
         payload = json.loads(request.body)

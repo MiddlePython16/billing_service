@@ -128,6 +128,10 @@ CELERY_BEAT_SCHEDULE = {
     'auto_pay': {
         'task': 'payment.tasks.auto_pay',
         'schedule': crontab(hour=1)
+    },
+    'remove_not_renewable_expired_items': {
+        'task': 'payment.tasks.remove_not_renewable_expired_items',
+        'schedule': crontab(hour=0)
     }
 }
 
@@ -140,24 +144,11 @@ YOOKASSA_SECRET_KEY = os.environ.get('YOOKASSA_SECRET_KEY')
 PAYMENT_MODEL = 'payment.Payment'
 
 PAYMENT_VARIANTS = {
-    'stripe': (
-        'payments.stripe.StripeCardProvider',
-        {
-            'secret_key': STRIPE_PRIVATE_KEY,
-            'public_key': STRIPE_PUBLIC_KEY,
-        }
-    ),
     'yookassa': (
         'payment.providers.yookassa.YookassaProvider',
         {
             'account_id': YOOKASSA_ACCOUNT_ID,
             'secret_key': YOOKASSA_SECRET_KEY,
-        }
-    ),
-    'dummy': (
-        'payments.dummy.DummyProvider',
-        {
-
         }
     )
 }

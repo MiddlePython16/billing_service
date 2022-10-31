@@ -3,11 +3,11 @@ from datetime import datetime
 import requests
 from celery import shared_task
 from celery.utils.log import get_task_logger
-from django.shortcuts import redirect
+from django.db.models import Q
 from payments import PaymentStatus, get_payment_model
 
 from config import settings
-from payment.models import ItemsToUsers, Payment, Price
+from payment.models import ItemsToUsers, Payment
 from payment.models import User
 from payment.utils.utils import get_json_from_permissions
 
@@ -20,7 +20,10 @@ logger = get_task_logger(__name__)
 def update_user_info(user_id):
     user = User.objects.get(id=user_id)
     data = {'permissions': get_json_from_permissions(user.items.all())}
-    return requests.patch(f"{settings.AUTH_URL}/api/v1/users/{user_id}", data=data)
+    response = requests.patch(f'{settings.AUTH_URL}/api/v1/users/{user_id}', data=data)
+    if response.status_code > 300:
+        logger.info(f'Error while updating user info, status code={response.status_code}')
+        raise Exception(f'Error while updating user info, status code={response.status_code}')
 
 
 @shared_task
@@ -37,21 +40,40 @@ def remove_not_paid_task() -> None:
 
 
 @shared_task
+def remove_not_renewable_expired_items():
+    ItemsToUsers.objects.filter(expires__lt=datetime.now(), renewable=False).delete()
+
+
+@shared_task(autoretry_for=(Exception,),
+             retry_backoff=True,
+             retry_kwargs={'max_retries': 1})
+def renew_item(item, user):
+    payment_model = get_payment_model()
+    last_payment = payment_model.objects \
+        .filter(Q(user_id=user), Q(items_in=[item])) \
+        .prefetch_related('items') \
+        .order_by('-created') \
+        .first()
+    payment = payment_model.objects.create(
+        variant=last_payment.variant,
+        user_id=user,
+        currency=last_payment.currency,
+        description='Subscription',
+        total=item.prices.get(currency=last_payment.currency).value,
+    )
+    payment.items.add(item)
+    payment.save()
+    payment.proceed_auto_payment()
+
+
+@shared_task
 def auto_pay() -> None:
     logger.info('### AUTO PAY! ###')
-    items_to_users = ItemsToUsers.objects.filter(expires__date=datetime.today())
+    items_to_users = ItemsToUsers.objects. \
+        filter(expires__lt=datetime.now(), renewable=True). \
+        select_related('item_id', 'user_id')
     logger.info(f'items_to_users: {items_to_users}')
     for items_to_user in items_to_users:
         item_id = items_to_user.item_id
         user_id = items_to_user.user_id
-        # create_payment
-        payment_model = get_payment_model()
-        payment = payment_model.objects.create(
-            variant='yookassa',
-            user_id=user_id,
-            currency=Price.objects.get(item_id=item_id).currency,
-            description='Subscription',
-            total=Price.objects.get(item_id=item_id).value,
-        )
-        payment.items.add(items_to_user.item_id)
-        return redirect('payment_details', payment_id=payment.id)
+        renew_item.delay(item_id, user_id)
