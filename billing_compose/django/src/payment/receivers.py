@@ -1,11 +1,12 @@
 import json
 
+from config import settings
+from dateutil.relativedelta import relativedelta
 from django.db import IntegrityError
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from payments.signals import status_changed
 
-from config import settings
 from payment.kafka import get_kafka_producer
 from payment.models import ItemsToUsers
 from payment.tasks import update_user_info
@@ -15,10 +16,12 @@ from payment.tasks import update_user_info
 def on_status_changed(sender, instance, **kwargs):
     if instance.status == 'confirmed':
         for item in instance.items.all():
-            try:
+            items_to_users = ItemsToUsers.objects.get(item_id=item, user_id=instance.user_id)
+            if items_to_users:
+                items_to_users.expires += relativedelta(months=items_to_users.item_id.length)
+                items_to_users.save()
+            else:
                 ItemsToUsers.objects.create(item_id=item, user_id=instance.user_id)
-            except IntegrityError as e:
-                print(e, flush=True)
 
 
 @receiver(post_delete, sender=ItemsToUsers)

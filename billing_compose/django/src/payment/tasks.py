@@ -3,12 +3,11 @@ from datetime import datetime
 import requests
 from celery import shared_task
 from celery.utils.log import get_task_logger
+from config import settings
 from django.db.models import Q
 from payments import PaymentStatus, get_payment_model
 
-from config import settings
-from payment.models import ItemsToUsers, Payment
-from payment.models import User
+from payment.models import Item, ItemsToUsers, Payment, User
 from payment.utils.utils import get_json_from_permissions
 
 logger = get_task_logger(__name__)
@@ -47,10 +46,12 @@ def remove_not_renewable_expired_items():
 @shared_task(autoretry_for=(Exception,),
              retry_backoff=True,
              retry_kwargs={'max_retries': 1})
-def renew_item(item, user):
+def renew_item(item_id, user_id):
     payment_model = get_payment_model()
+    item = Item.objects.get(id=item_id)
+    user = User.objects.get(id=user_id)
     last_payment = payment_model.objects \
-        .filter(Q(user_id=user), Q(items_in=[item])) \
+        .filter(Q(user_id=user), Q(items__in=[item])) \
         .prefetch_related('items') \
         .order_by('-created') \
         .first()
@@ -74,6 +75,6 @@ def auto_pay() -> None:
         select_related('item_id', 'user_id')
     logger.info(f'items_to_users: {items_to_users}')
     for items_to_user in items_to_users:
-        item_id = items_to_user.item_id
-        user_id = items_to_user.user_id
+        item_id = items_to_user.item_id.id
+        user_id = items_to_user.user_id.id
         renew_item.delay(item_id, user_id)

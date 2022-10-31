@@ -12,8 +12,6 @@ from payments import PurchasedItem
 from payments.core import get_base_url, provider_factory
 from payments.models import BasePayment
 
-from config import settings
-
 
 class UUIDMixin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
