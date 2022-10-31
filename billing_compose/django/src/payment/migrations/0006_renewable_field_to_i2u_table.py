@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('payment', '0005_rename_payments_rel'),
     ]
@@ -13,7 +12,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='itemstousers',
             name='renewable',
-            field=models.BooleanField(blank=True, default=None, verbose_name='renewable'),
+            field=models.BooleanField(blank=True, default=None, null=True, verbose_name='renewable'),
             preserve_default=False,
         ),
     ]

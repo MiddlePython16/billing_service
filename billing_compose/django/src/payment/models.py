@@ -67,7 +67,7 @@ class ItemsToUsers(CreatedMixin, ModifiedMixin, UUIDMixin):
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE)
     user_id = models.ForeignKey('User', on_delete=models.CASCADE)
     expires = models.DateTimeField(blank=True)
-    renewable = models.BooleanField(_('renewable'), blank=True)
+    renewable = models.BooleanField(_('renewable'), blank=True, null=True)
 
     class Meta:
         db_table = 'billing\".\"items_to_users'
