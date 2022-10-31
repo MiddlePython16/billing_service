@@ -26,7 +26,7 @@
 
 ## Схема базы данных
 
-<a href="https://ibb.co/Pg87mbp"><img src="https://i.ibb.co/JHPfBbL/photo-2022-10-31-22-35-42.jpg" alt="photo-2022-10-31-22-35-42" border="0" /></a>
+<a href="https://ibb.co/gJg3DxM"><img src="https://i.ibb.co/SBvPKzX/photo-2022-10-31-23-48-28.jpg" alt="photo-2022-10-31-23-48-28" border="0"></a>
 
 ## Как все работает
 
