@@ -3,7 +3,7 @@
 ![Nginx](https://img.shields.io/badge/Nginx-000000?style=badge&logo=nginx&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=badge&logo=postgresql&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-092E20?style=badge&logo=django&logoColor=white)
-![Kafka](https://img.shields.io/badge/Kafka-FFFFFF?.svg?style=Kafka&logo=kafka)
+![Kafka](https://img.shields.io/badge/Kafka-000000?.svg?style=ApacheKafka&logo=ApacheKafka)
 ![Celery](https://img.shields.io/badge/Celery-DBE4A?.svg?style=celery&logo=celery)
 
 # Биллинг
