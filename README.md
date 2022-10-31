@@ -5,6 +5,7 @@
 ![Django](https://img.shields.io/badge/Django-092E20?style=badge&logo=django&logoColor=white)
 ![Kafka](https://img.shields.io/badge/Kafka-000000?.svg?style=ApacheKafka&logo=ApacheKafka)
 ![Celery](https://img.shields.io/badge/Celery-DBE4A?.svg?style=celery&logo=celery)
+![Redis](https://img.shields.io/badge/Redis-%23DD0031.svg?&style=badge&logo=redis&logoColor=white)
 
 # Биллинг
 
@@ -49,6 +50,7 @@
 - Django
 - DRF
 - Celery
+- Redis
 - Postgres
 - Kafka
 - JWT
