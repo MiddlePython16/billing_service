@@ -6,6 +6,7 @@ from celery.utils.log import get_task_logger
 from config import settings
 from django.db.models import Q
 from payments import PaymentStatus, get_payment_model
+from http import HTTPStatus
 
 from payment.models import Item, ItemsToUsers, Payment, User
 from payment.utils.utils import get_json_from_permissions
@@ -20,7 +21,7 @@ def update_user_info(user_id):
     user = User.objects.get(id=user_id)
     data = {'permissions': get_json_from_permissions(user.items.all())}
     response = requests.patch(f'{settings.AUTH_URL}/api/v1/users/{user_id}', data=data)
-    if response.status_code > 300:
+    if response.status_code > HTTPStatus.MULTIPLE_CHOICES:
         logger.info(f'Error while updating user info, status code={response.status_code}')
         raise Exception(f'Error while updating user info, status code={response.status_code}')
 
