@@ -1,5 +1,6 @@
 from payment.models import Price
 from rest_framework import serializers
+from payment.api.v1.utils import error_messages
 
 
 class PriceToItemSerializer(serializers.ModelSerializer):
@@ -17,7 +18,9 @@ class MutationPriceSerializer(serializers.ModelSerializer):
         ).first()
 
         if price is not None:
-            raise serializers.ValidationError('Item already have price in this currency')
+            raise serializers.ValidationError(
+                error_messages.ITEM_ALREADY_HAVE_PRICE_IN_THIS_CURRENCY,
+            )
 
         return super().create(validated_data)
 
