@@ -11,8 +11,12 @@ class PriceToItemSerializer(serializers.ModelSerializer):
 class MutationPriceSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
-        if self.Meta.model.objects.filter(item_id=validated_data['item_id'],
-                                          currency=validated_data['currency']).first() is not None:
+        price = self.Meta.model.objects.filter(
+            item_id=validated_data['item_id'],
+            currency=validated_data['currency'],
+        ).first()
+
+        if price is not None:
             raise serializers.ValidationError('Item already have price in this currency')
 
         return super().create(validated_data)

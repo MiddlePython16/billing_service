@@ -129,7 +129,7 @@ class Item(UUIDMixin):
 
 
 class User(UUIDMixin):
-    items = models.ManyToManyField(Item, through='ItemsToUsers')
+    items = models.ManyToManyField(Item, through='ItemsToUsers')  # noqa: WPS110
     payment_method_id = models.UUIDField(blank=True, null=True)
 
     class Meta:

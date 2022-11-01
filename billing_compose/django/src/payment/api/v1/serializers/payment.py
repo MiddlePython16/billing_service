@@ -15,7 +15,7 @@ class BasePaymentSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.CharField())
     def get_pay_url(self, obj):
-        return urljoin(get_base_url(), reverse("payment_details", obj.id))
+        return urljoin(get_base_url(), reverse('payment_details', obj.id))
 
     class Meta:
         model = Payment

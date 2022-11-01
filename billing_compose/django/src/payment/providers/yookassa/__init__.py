@@ -26,40 +26,28 @@ class YookassaProvider(BasicProvider):
 
     def _create_payment(self, payment: Payment) -> PaymentResponse:
         payment_method_id = payment.user_id.payment_method_id
+        payment_params = {
+            'amount': {
+                'value': str(payment.total),
+                'currency': payment.currency,
+            },
+            'confirmation': {
+                'type': 'redirect',
+                'return_url': urljoin(get_base_url(), reverse('index')),
+            },
+            'capture': True,
+            'description': payment.description,
+            'metadata': {
+                'token': payment.token,
+            },
+            'save_payment_method': True,
+        }
+
         if payment_method_id:
-            params = {
-                "amount": {
-                    "value": str(payment.total),
-                    "currency": payment.currency,
-                },
-                "capture": True,
-                "payment_method_id": payment_method_id,
-                "description": payment.description,
-                "metadata": {
-                    'token': payment.token
-                },
-                "save_payment_method": True
-            }
-            confirmation_needed_flag = False
-        else:
-            params = {
-                "amount": {
-                    "value": str(payment.total),
-                    "currency": payment.currency,
-                },
-                "confirmation": {
-                    "type": "redirect",
-                    "return_url": urljoin(get_base_url(), reverse('index')),
-                },
-                "capture": True,
-                "description": payment.description,
-                "metadata": {
-                    'token': payment.token
-                },
-                "save_payment_method": True
-            }
-            confirmation_needed_flag = True
-        return YookassaPayment.create(params, uuid.uuid4()), confirmation_needed_flag
+            payment_params['payment_method_id'] = payment_method_id
+
+        confirmation_needed_flag = True
+        return YookassaPayment.create(payment_params, uuid.uuid4()), confirmation_needed_flag
 
     def get_form(self, payment: BasePayment, data=None):
         if payment.status == PaymentStatus.WAITING:
@@ -68,8 +56,7 @@ class YookassaProvider(BasicProvider):
             payment.save()
             if confirmation_needed_flag:
                 raise RedirectNeeded(payment_data.confirmation.confirmation_url)
-            else:
-                raise RedirectNeeded(urljoin(get_base_url(), reverse('index')))
+            raise RedirectNeeded(urljoin(get_base_url(), reverse('index')))
 
     def proceed_auto_payment(self, payment: BasePayment, data=None):
         if payment.status == PaymentStatus.WAITING:
@@ -113,11 +100,11 @@ class YookassaProvider(BasicProvider):
         amount = int(amount or payment.total)
         try:
             refund = Refund.create({
-                "amount": {
-                    "value": amount,
-                    "currency": payment.currency
+                'amount': {
+                    'value': amount,
+                    'currency': payment.currency,
                 },
-                "payment_id": payment.transaction_id
+                'payment_id': payment.transaction_id,
             })
         except Exception as error:
             logger.exception(error)
