@@ -5,7 +5,7 @@ WORKDIR /code
 COPY ./requirements.txt .
 
 RUN pip install --upgrade pip
-RUN pip install -r /code/requirements.txt
+RUN pip install --no-cache-dir -r /code/requirements.txt
 
 COPY ./entrypoint.sh .
 COPY ./src .
