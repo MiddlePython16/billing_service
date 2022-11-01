@@ -33,7 +33,7 @@ def on_item_to_user_create_delete(sender, instance, *args, **kwargs):
 def on_subcription_added(sender, instance, *args, **kwargs):
     kafka_producer = get_kafka_producer()
     if kafka_producer.bootstrap_connected():
-        key = f"{instance.user_id.id}+{instance.item_id.id}".encode('utf-8')
+        key = f'{instance.user_id.id}+{instance.item_id.id}'.encode('utf-8')
         value = json.dumps({'user_id': instance.user_id.id,
                             'item_name': instance.item_id.name}).encode('utf-8')
         kafka_producer.send(topic=settings.SUBSCRIPTION_ADDED_TOPIC,
