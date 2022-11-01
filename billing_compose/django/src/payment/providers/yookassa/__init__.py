@@ -14,6 +14,7 @@ from yookassa.domain.notification import WebhookNotification
 from yookassa.domain.response import PaymentResponse
 
 from payment.models import Payment
+from config.settings import logger
 
 
 class YookassaProvider(BasicProvider):
@@ -87,8 +88,8 @@ class YookassaProvider(BasicProvider):
         payload = json.loads(request.body)
         try:
             notification_object = WebhookNotification(payload)
-        except Exception as e:
-            print(e)
+        except Exception as error:
+            logger.exception(error)
 
         current_event = notification_object.event
         current_payment = notification_object.object
@@ -119,10 +120,10 @@ class YookassaProvider(BasicProvider):
                 },
                 "payment_id": payment.transaction_id
             })
-        except Exception as e:
-            print(e)
+        except Exception as error:
+            logger.exception(error)
         else:
-            print('[refund]:', refund.json())
+            logger.info('[refund]:', refund.json())
             if refund.status != 'succeeded':
                 amount = 0
         return amount

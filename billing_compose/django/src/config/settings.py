@@ -4,6 +4,7 @@ from pathlib import Path
 from celery.schedules import crontab
 from dotenv import load_dotenv
 from split_settings.tools import include
+from loguru import logger
 
 load_dotenv()
 
@@ -172,3 +173,9 @@ AUTH_URL = os.environ.get('AUTH_URL', '127.0.0.1')
 SUBSCRIPTION_ADDED_TOPIC = os.environ.get('SUBSCRIPTION_ADDED_TOPIC', '')
 
 AUTH_TOKEN_EXPIRE_IN_SECONDS = 600
+
+logger.add(
+    'logs.log',
+    format='{time} {level} {message}',
+    level='DEBUG',
+)
