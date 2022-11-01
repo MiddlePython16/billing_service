@@ -31,10 +31,6 @@ class YookassaProvider(BasicProvider):
                 'value': str(payment.total),
                 'currency': payment.currency,
             },
-            'confirmation': {
-                'type': 'redirect',
-                'return_url': urljoin(get_base_url(), reverse('index')),
-            },
             'capture': True,
             'description': payment.description,
             'metadata': {
@@ -45,8 +41,12 @@ class YookassaProvider(BasicProvider):
 
         if payment_method_id:
             payment_params['payment_method_id'] = payment_method_id
+        else:
+            payment_params['confirmation'] = {'type': 'redirect',
+                                              'return_url': urljoin(get_base_url(), reverse('index')),
+                                              },
 
-        confirmation_needed_flag = True
+        confirmation_needed_flag = not bool(payment_method_id)
         return YookassaPayment.create(payment_params, uuid.uuid4()), confirmation_needed_flag
 
     def get_form(self, payment: BasePayment, data=None):
