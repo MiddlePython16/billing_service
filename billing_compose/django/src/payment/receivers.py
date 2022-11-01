@@ -7,12 +7,13 @@ from django.dispatch import receiver
 from payment.kafka import get_kafka_producer
 from payment.models import ItemsToUsers
 from payment.tasks import update_user_info
+from payments import PaymentStatus
 from payments.signals import status_changed
 
 
 @receiver(status_changed)
 def on_status_changed(sender, instance, **kwargs):
-    if instance.status == 'confirmed':
+    if instance.status == PaymentStatus.CONFIRMED:
         for item in instance.items.all():
             items_to_users = ItemsToUsers.objects.get(item_id=item, user_id=instance.user_id)
             if items_to_users:

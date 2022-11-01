@@ -1,9 +1,8 @@
 from functools import lru_cache
 from typing import Optional
 
-from kafka import KafkaProducer
-
 from config import settings
+from kafka import KafkaProducer
 
 kafka_producer: Optional[KafkaProducer] = None
 

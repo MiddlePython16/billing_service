@@ -2,8 +2,10 @@ import json
 import uuid
 from urllib.parse import urljoin
 
+from config.settings import logger
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse
+from payment.models import Payment
 from payments import PaymentStatus, RedirectNeeded
 from payments.core import BasicProvider, get_base_url
 from payments.models import BasePayment
@@ -12,9 +14,6 @@ from yookassa import Payment as YookassaPayment
 from yookassa import Refund
 from yookassa.domain.notification import WebhookNotification
 from yookassa.domain.response import PaymentResponse
-
-from payment.models import Payment
-from config.settings import logger
 
 
 class YookassaProvider(BasicProvider):

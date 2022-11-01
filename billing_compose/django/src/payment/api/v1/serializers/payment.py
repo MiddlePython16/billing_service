@@ -1,13 +1,12 @@
 from urllib.parse import urljoin
 
+from config import settings
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema_field
-from payments.core import get_base_url
-from rest_framework import serializers
-
-from config import settings
 from payment.api.v1.serializers.item import ItemSerializer
 from payment.models import Item, ItemsToPayments, Payment
+from payments.core import get_base_url
+from rest_framework import serializers
 
 
 class BasePaymentSerializer(serializers.ModelSerializer):

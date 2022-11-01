@@ -1,7 +1,6 @@
 from typing import Optional
 
 from django.http import HttpRequest, HttpResponse
-
 from extensions.jwt.responses import HttpResponseUNAUTHORIZED
 
 
