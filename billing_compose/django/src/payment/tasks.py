@@ -20,7 +20,7 @@ def update_user_info(user_id):
     user = User.objects.get(id=user_id)
     data = {'permissions': get_json_from_permissions(user.items.all())}
     response = requests.patch(f'{settings.AUTH_URL}/api/v1/users/{user_id}', data=data)
-    if response.status_code > HTTPStatus.MULTIPLE_CHOICES:
+    if response.status_code != HTTPStatus.NO_CONTENT:
         logger.info(f'Error while updating user info, status code={response.status_code}')
         raise Exception(f'Error while updating user info, status code={response.status_code}')
 

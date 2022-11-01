@@ -1,9 +1,13 @@
-from config import settings
+from urllib.parse import urljoin
+
 from django.urls import reverse
 from drf_spectacular.utils import extend_schema_field
+from payments.core import get_base_url
+from rest_framework import serializers
+
+from config import settings
 from payment.api.v1.serializers.item import ItemSerializer
 from payment.models import Item, ItemsToPayments, Payment
-from rest_framework import serializers
 
 
 class BasePaymentSerializer(serializers.ModelSerializer):
@@ -12,7 +16,7 @@ class BasePaymentSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.CharField())
     def get_pay_url(self, obj):
-        return reverse("payment_details", obj.id)
+        return urljoin(get_base_url(), reverse("payment_details", obj.id))
 
     class Meta:
         model = Payment

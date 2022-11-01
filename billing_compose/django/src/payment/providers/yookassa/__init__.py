@@ -1,8 +1,9 @@
 import json
 import uuid
+from urllib.parse import urljoin
 
 from django.http import HttpRequest, HttpResponse
-from payment.models import Payment
+from django.urls import reverse
 from payments import PaymentStatus, RedirectNeeded
 from payments.core import BasicProvider, get_base_url
 from payments.models import BasePayment
@@ -11,6 +12,8 @@ from yookassa import Payment as YookassaPayment
 from yookassa import Refund
 from yookassa.domain.notification import WebhookNotification
 from yookassa.domain.response import PaymentResponse
+
+from payment.models import Payment
 
 
 class YookassaProvider(BasicProvider):
@@ -46,7 +49,7 @@ class YookassaProvider(BasicProvider):
                 },
                 "confirmation": {
                     "type": "redirect",
-                    "return_url": get_base_url(),
+                    "return_url": urljoin(get_base_url(), reverse('index')),
                 },
                 "capture": True,
                 "description": payment.description,
@@ -66,7 +69,7 @@ class YookassaProvider(BasicProvider):
             if confirmation_needed_flag:
                 raise RedirectNeeded(payment_data.confirmation.confirmation_url)
             else:
-                raise RedirectNeeded(get_base_url())
+                raise RedirectNeeded(urljoin(get_base_url(), reverse('index')))
 
     def proceed_auto_payment(self, payment: BasePayment, data=None):
         if payment.status == PaymentStatus.WAITING:
