@@ -2,7 +2,6 @@ import json
 
 from config import settings
 from dateutil.relativedelta import relativedelta
-from django.db import IntegrityError
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from payments.signals import status_changed
