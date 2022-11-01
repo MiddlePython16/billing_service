@@ -1,10 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
-from payments import RedirectNeeded, get_payment_model
-
 from payment.models import Item, Price, User
 from payment.utils.utils import get_json_from_permissions
+from payments import RedirectNeeded, get_payment_model
 
 
 def payment_details(request, payment_id):

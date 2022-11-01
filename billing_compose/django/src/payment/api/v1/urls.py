@@ -1,13 +1,12 @@
-from django.urls import path, include
+from django.urls import include, path
 from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
                                    SpectacularSwaggerView)
-from rest_framework.routers import DefaultRouter
-from rest_framework_nested.routers import NestedDefaultRouter
-
-from payment.api.v1.views import item, payment, permission, user, price
+from payment.api.v1.views import item, payment, permission, price, user
 from payment.api.v1.views.item import PermissionToItemViewSet
 from payment.api.v1.views.payment import ItemToPaymentViewSet
 from payment.api.v1.views.user import ItemToUserViewSet
+from rest_framework.routers import DefaultRouter
+from rest_framework_nested.routers import NestedDefaultRouter
 
 router = DefaultRouter()
 router.register(r'items', item.ItemViewSet, basename='items')

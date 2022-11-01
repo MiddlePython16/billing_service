@@ -4,11 +4,10 @@ from config import settings
 from dateutil.relativedelta import relativedelta
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
-from payments.signals import status_changed
-
 from payment.kafka import get_kafka_producer
 from payment.models import ItemsToUsers
 from payment.tasks import update_user_info
+from payments.signals import status_changed
 
 
 @receiver(status_changed)

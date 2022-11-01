@@ -1,8 +1,7 @@
-from rest_framework import serializers
-
 from payment.api.v1.serializers.permission import MutationPermissionSerializer
 from payment.api.v1.serializers.price import PriceToItemSerializer
-from payment.models import Item, Permission, Price, PermissionsToItems
+from payment.models import Item, Permission, PermissionsToItems, Price
+from rest_framework import serializers
 
 
 class MutationItemSerializer(serializers.ModelSerializer):

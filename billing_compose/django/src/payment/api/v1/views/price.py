@@ -1,9 +1,9 @@
-from rest_framework.viewsets import ModelViewSet
-
 from payment.api.__base__ import FlexibleSerializerMixin
-from payment.api.v1.serializers.price import MutationPriceSerializer, PriceSerializer
+from payment.api.v1.serializers.price import (MutationPriceSerializer,
+                                              PriceSerializer)
 from payment.api.v1.views.__base__ import CustomPaginator
 from payment.models import Price
+from rest_framework.viewsets import ModelViewSet
 
 
 class PriceViewSet(FlexibleSerializerMixin, ModelViewSet):

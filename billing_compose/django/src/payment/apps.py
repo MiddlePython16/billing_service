@@ -6,6 +6,5 @@ class PaymentConfig(AppConfig):
     name = 'payment'
 
     def ready(self):
-        from . import receivers
-        from . import kafka
+        from . import kafka, receivers
         kafka.kafka_producer = kafka.init_kafka_producer()

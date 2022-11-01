@@ -1,10 +1,9 @@
 import os
 from pathlib import Path
 
+from celery.schedules import crontab
 from dotenv import load_dotenv
 from split_settings.tools import include
-
-from celery.schedules import crontab
 
 load_dotenv()
 

@@ -1,15 +1,14 @@
 from datetime import datetime
+from http import HTTPStatus
 
 import requests
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from config import settings
 from django.db.models import Q
-from payments import PaymentStatus, get_payment_model
-from http import HTTPStatus
-
 from payment.models import Item, ItemsToUsers, Payment, User
 from payment.utils.utils import get_json_from_permissions
+from payments import PaymentStatus, get_payment_model
 
 logger = get_task_logger(__name__)
 
