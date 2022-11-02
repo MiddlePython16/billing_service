@@ -1,7 +1,7 @@
-from rest_framework import serializers
-
 from payment.api.v1.serializers.item import ItemSerializer
-from payment.models import User, Item, ItemsToUsers
+from payment.models import Item, ItemsToUsers, User
+from rest_framework import serializers
+from payment.api.v1.utils import error_messages
 
 
 class MutationUserSerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class MutationItemsToUsersSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         if self.Meta.model.objects.filter(item_id=validated_data['item_id'],
                                           user_id=validated_data['user_id']).first() is not None:
-            raise serializers.ValidationError('User already have this item')
+            raise serializers.ValidationError(error_messages.USER_ALREADY_HAVE_THIS_ITEM)
 
         return super().create(validated_data)
 

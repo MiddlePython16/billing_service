@@ -1,5 +1,7 @@
+from typing import Optional
+
 from django.http import HttpRequest, HttpResponse
-from extensions.jwt.responses import HttpResponsesUNAUTHORIZED
+from extensions.jwt.responses import HttpResponseUNAUTHORIZED
 
 
 def handle_cookies(request: HttpRequest) -> str:
@@ -8,17 +10,15 @@ def handle_cookies(request: HttpRequest) -> str:
 
 def handle_headers(request: HttpRequest) -> str:
     header = request.headers.get('Authorization', '').split(' ')
-    if len(header) > 1:
-        return header[1]
-    return ''
+    return header[1] if len(header) > 1 else ''
 
 
 def raw_decoded_jwt_user(decoded_jwt: dict) -> dict:
     return decoded_jwt
 
 
-def handle_unauthorized(error_content: str = '') -> HttpResponse:
-    return HttpResponsesUNAUTHORIZED(error_content)
+def handle_unauthorized(exception: Optional[Exception] = None) -> HttpResponse:
+    return HttpResponseUNAUTHORIZED(str(exception))
 
 
 token_handlers = {

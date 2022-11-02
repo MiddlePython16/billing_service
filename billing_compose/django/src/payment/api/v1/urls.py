@@ -1,29 +1,33 @@
-from django.urls import path, include
+from django.urls import include, path
 from drf_spectacular.views import (SpectacularAPIView, SpectacularRedocView,
                                    SpectacularSwaggerView)
+from payment.api.v1.views import item, payment, permission, price, user
 from rest_framework.routers import DefaultRouter
 from rest_framework_nested.routers import NestedDefaultRouter
 
-from payment.api.v1.views import item, payment, permission, user, price
-from payment.api.v1.views.item import PermissionToItemViewSet
-from payment.api.v1.views.payment import ItemToPaymentViewSet
-from payment.api.v1.views.user import ItemToUserViewSet
-
 router = DefaultRouter()
-router.register(r'items', item.ItemViewSet, basename='items')
-router.register(r'payments', payment.PaymentViewSet, basename='payments')
-router.register(r'permissions', permission.PermissionViewSet, basename='permissions')
-router.register(r'prices', price.PriceViewSet, basename='prices')
-router.register(r'users', user.UserViewSet, basename='users')
+router.register('items', item.ItemViewSet, basename='items')
+router.register('payments', payment.PaymentViewSet, basename='payments')
+router.register('permissions', permission.PermissionViewSet, basename='permissions')
+router.register('prices', price.PriceViewSet, basename='prices')
+router.register('users', user.UserViewSet, basename='users')
 
-users_router = NestedDefaultRouter(router, r'users', lookup='user')
-users_router.register(r'items', ItemToUserViewSet, basename='items_to_users')
+users_router = NestedDefaultRouter(router, 'users', lookup='user')
+users_router.register('items', user.ItemToUserViewSet, basename='items_to_users')
 
-items_router = NestedDefaultRouter(router, r'items', lookup='item')
-items_router.register(r'permissions', PermissionToItemViewSet, basename='permissions_to_items')
+items_router = NestedDefaultRouter(router, 'items', lookup='item')
+items_router.register(
+    'permissions',
+    item.PermissionToItemViewSet,
+    basename='permissions_to_items',
+)
 
-payments_router = NestedDefaultRouter(router, r'payments', lookup='payment')
-payments_router.register(r'items', ItemToPaymentViewSet, basename='items_to_payments')
+payments_router = NestedDefaultRouter(router, 'payments', lookup='payment')
+payments_router.register(
+    'items',
+    payment.ItemToPaymentViewSet,
+    basename='items_to_payments',
+)
 
 urlpatterns = [
     path('', include(router.urls)),

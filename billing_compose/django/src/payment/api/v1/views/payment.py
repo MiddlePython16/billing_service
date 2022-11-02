@@ -1,9 +1,10 @@
-from rest_framework.viewsets import ModelViewSet
-
-from payment.api.__base__ import FlexibleSerializerMixin, NestedPathLookupMixin, CLDModelViewSet
-from payment.api.v1.serializers.payment import MutationPaymentSerializer, MutationItemsToPaymentsSerializer
+from payment.api.__base__ import (CLDModelViewSet, FlexibleSerializerMixin,
+                                  NestedPathLookupMixin)
+from payment.api.v1.serializers.payment import (
+    MutationItemsToPaymentsSerializer, MutationPaymentSerializer)
 from payment.api.v1.views.__base__ import CustomPaginator
-from payment.models import Payment, ItemsToPayments
+from payment.models import ItemsToPayments, Payment
+from rest_framework.viewsets import ModelViewSet
 
 
 class PaymentViewSet(FlexibleSerializerMixin, ModelViewSet):

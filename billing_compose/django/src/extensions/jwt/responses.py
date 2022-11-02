@@ -3,5 +3,5 @@ from http import HTTPStatus
 from django.http import HttpResponse
 
 
-class HttpResponsesUNAUTHORIZED(HttpResponse):
+class HttpResponseUNAUTHORIZED(HttpResponse):
     status_code = HTTPStatus.UNAUTHORIZED

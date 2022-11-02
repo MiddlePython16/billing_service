@@ -1,9 +1,11 @@
-from rest_framework.viewsets import ModelViewSet
-
-from payment.api.__base__ import FlexibleSerializerMixin, CLDModelViewSet, NestedPathLookupMixin
-from payment.api.v1.serializers.user import UserSerializer, MutationUserSerializer, MutationItemsToUsersSerializer
+from payment.api.__base__ import (CLDModelViewSet, FlexibleSerializerMixin,
+                                  NestedPathLookupMixin)
+from payment.api.v1.serializers.user import (MutationItemsToUsersSerializer,
+                                             MutationUserSerializer,
+                                             UserSerializer)
 from payment.api.v1.views.__base__ import CustomPaginator
-from payment.models import User, ItemsToUsers
+from payment.models import ItemsToUsers, User
+from rest_framework.viewsets import ModelViewSet
 
 
 class UserViewSet(FlexibleSerializerMixin,

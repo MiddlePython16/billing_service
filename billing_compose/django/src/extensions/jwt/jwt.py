@@ -39,7 +39,7 @@ def jwt_required(optional: Optional[bool] = False):  # noqa: WPS231
                     token = decode_jwt(token=token)
                     current_user = user_handler(decoded_jwt=token)
                 except PyJWTError as error:
-                    return unauthorized_handler(error_content=str(error))
+                    return unauthorized_handler(exception=error)
 
             return func(*args, **(kwargs | {'current_user': current_user}))
 

@@ -41,7 +41,7 @@ class PaymentAdmin(admin.ModelAdmin, PrefetchRelatedMixin):
     list_display = ('id', 'get_items', 'status', 'currency', 'total', 'captured_amount')
 
     def get_items(self, obj):
-        return ', '.join(item.name for item in obj.items.all())
+        return ', '.join(item.name for item in obj.items.all())  # noqa: WPS110
 
     get_items.short_description = _('items')  # type: ignore
 

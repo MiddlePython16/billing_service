@@ -18,3 +18,4 @@ yookassa==2.3.2
 python-dateutil==2.8.2
 django-extensions==3.2.1
 kafka-python==2.0.2
+loguru==0.6.0

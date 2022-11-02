@@ -1,8 +1,8 @@
-from rest_framework import serializers
-
 from payment.api.v1.serializers.permission import MutationPermissionSerializer
 from payment.api.v1.serializers.price import PriceToItemSerializer
-from payment.models import Item, Permission, Price, PermissionsToItems
+from payment.models import Item, Permission, PermissionsToItems, Price
+from rest_framework import serializers
+from payment.api.v1.utils import error_messages
 
 
 class MutationItemSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class MutationItemSerializer(serializers.ModelSerializer):
 
     def validate_prices(self, items):
         if len(items) != len({item['currency'] for item in items}):
-            raise serializers.ValidationError('Prices must be unique')
+            raise serializers.ValidationError(error_messages.PRICES_MUST_BE_UNIQUE)
         return items
 
     class Meta:
@@ -51,7 +51,7 @@ class MutationPermissionsToItemsSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         if self.Meta.model.objects.filter(item_id=validated_data['item_id'],
                                           user_id=validated_data['permission_id']).first() is not None:
-            raise serializers.ValidationError('Item already have this permission')
+            raise serializers.ValidationError(error_messages.ITEM_ALREADY_HAVE_THIS_PERMISSION)
 
         return super().create(validated_data)
 
