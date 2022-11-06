@@ -1,7 +1,9 @@
 import json
+import logging
 
 from config import settings
 from dateutil.relativedelta import relativedelta
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from payment.kafka import get_kafka_producer
@@ -10,17 +12,21 @@ from payment.tasks import update_user_info
 from payments import PaymentStatus
 from payments.signals import status_changed
 
+logger = logging.getLogger(__name__)
+
 
 @receiver(status_changed)
 def on_status_changed(sender, instance, **kwargs):
     if instance.status == PaymentStatus.CONFIRMED:
         for item in instance.items.all():
-            items_to_users = ItemsToUsers.objects.get(item_id=item, user_id=instance.user_id)
-            if items_to_users:
+            try:
+                items_to_users = ItemsToUsers.objects.get(item_id=item, user_id=instance.user_id)
+            except ObjectDoesNotExist as e:
+                logger.info(e)
+                ItemsToUsers.objects.create(item_id=item, user_id=instance.user_id)
+            else:
                 items_to_users.expires += relativedelta(months=items_to_users.item_id.length)
                 items_to_users.save()
-            else:
-                ItemsToUsers.objects.create(item_id=item, user_id=instance.user_id)
 
 
 @receiver(post_delete, sender=ItemsToUsers)

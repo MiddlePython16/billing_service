@@ -1,8 +1,8 @@
 import json
+import logging
 import uuid
 from urllib.parse import urljoin
 
-from config.settings import logger
 from django.http import HttpRequest, HttpResponse
 from django.urls import reverse
 from payment.models import Payment
@@ -15,6 +15,8 @@ from yookassa import Refund
 from yookassa.domain.notification import WebhookNotification
 from yookassa.domain.response import PaymentResponse
 
+logger = logging.getLogger(__name__)
+
 
 class YookassaProvider(BasicProvider):
     def __init__(self, account_id: str, secret_key: str, **kwargs):
@@ -26,28 +28,40 @@ class YookassaProvider(BasicProvider):
 
     def _create_payment(self, payment: Payment) -> PaymentResponse:
         payment_method_id = payment.user_id.payment_method_id
-        payment_params = {
-            'amount': {
-                'value': str(payment.total),
-                'currency': payment.currency,
-            },
-            'capture': True,
-            'description': payment.description,
-            'metadata': {
-                'token': payment.token,
-            },
-            'save_payment_method': True,
-        }
-
         if payment_method_id:
-            payment_params['payment_method_id'] = payment_method_id
+            params = {
+                "amount": {
+                    "value": str(payment.total),
+                    "currency": payment.currency,
+                },
+                "capture": True,
+                "payment_method_id": payment_method_id,
+                "description": payment.description,
+                "metadata": {
+                    'token': payment.token
+                },
+                "save_payment_method": True
+            }
+            confirmation_needed_flag = False
         else:
-            payment_params['confirmation'] = {'type': 'redirect',
-                                              'return_url': urljoin(get_base_url(), reverse('index')),
-                                              },
-
-        confirmation_needed_flag = not bool(payment_method_id)
-        return YookassaPayment.create(payment_params, uuid.uuid4()), confirmation_needed_flag
+            params = {
+                "amount": {
+                    "value": str(payment.total),
+                    "currency": payment.currency,
+                },
+                "confirmation": {
+                    "type": "redirect",
+                    "return_url": urljoin(get_base_url(), reverse('index')),
+                },
+                "capture": True,
+                "description": payment.description,
+                "metadata": {
+                    'token': payment.token
+                },
+                "save_payment_method": True
+            }
+            confirmation_needed_flag = True
+        return YookassaPayment.create(params, uuid.uuid4()), confirmation_needed_flag
 
     def get_form(self, payment: BasePayment, data=None):
         if payment.status == PaymentStatus.WAITING:
@@ -71,6 +85,7 @@ class YookassaProvider(BasicProvider):
         return current_payment.metadata.get('token')
 
     def process_data(self, payment: BasePayment, request: HttpRequest):
+        logger.info('get webhook notification')
         payload = json.loads(request.body)
         try:
             notification_object = WebhookNotification(payload)

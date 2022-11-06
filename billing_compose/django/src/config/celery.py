@@ -1,7 +1,9 @@
+import logging
 import os
 
 from celery import Celery
-from config.settings import logger
+
+logger = logging.getLogger(__name__)
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 

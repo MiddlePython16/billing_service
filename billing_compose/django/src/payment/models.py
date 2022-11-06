@@ -66,7 +66,7 @@ class PermissionsToItems(UUIDMixin):
 class ItemsToUsers(CreatedMixin, ModifiedMixin, UUIDMixin):
     item_id = models.ForeignKey('Item', on_delete=models.CASCADE)
     user_id = models.ForeignKey('User', on_delete=models.CASCADE)
-    expires = models.DateTimeField(blank=True)
+    expires = models.DateTimeField(blank=True, null=True)
     renewable = models.BooleanField(_('renewable'), blank=True, null=True)
 
     class Meta:

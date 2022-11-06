@@ -3,12 +3,35 @@ from pathlib import Path
 
 from celery.schedules import crontab
 from dotenv import load_dotenv
-from loguru import logger
 from split_settings.tools import include
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'base': {
+            'format': '{asctime} {levelname} {module}: {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'base',
+        },
+    },
+    'loggers': {
+        'payment': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}
 
 include(
     'components/database.py',
@@ -174,8 +197,4 @@ SUBSCRIPTION_ADDED_TOPIC = os.environ.get('SUBSCRIPTION_ADDED_TOPIC', '')
 
 AUTH_TOKEN_EXPIRE_IN_SECONDS = 600
 
-logger.add(
-    'logs.log',
-    format='{time} {level} {message}',
-    level='DEBUG',
-)
+CSRF_TRUSTED_ORIGINS = [f'https://*.{PAYMENT_HOST}']
