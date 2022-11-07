@@ -1,11 +1,14 @@
 import logging
 
+from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.response import TemplateResponse
+from payments import RedirectNeeded, get_payment_model
+
+from extensions.jwt.jwt import jwt_required
 from payment.models import Item, Price, User
 from payment.utils.utils import get_json_from_permissions
-from payments import RedirectNeeded, get_payment_model
 
 logger = logging.getLogger(__name__)
 
@@ -66,3 +69,14 @@ def payment_failure(request):
 def get_json_blob(request, user_id):
     user = User.objects.get(id=user_id)
     return HttpResponse(str({'permissions': get_json_from_permissions(user.items.all())}))
+
+
+@jwt_required()
+def get_my_info(request, current_user):
+    user = User.objects.filter(id=current_user['sub']).first()
+    if user is None:
+        user = User.objects.create(id=current_user['sub'])
+    content = {'user': serializers.serialize('json', (user,)),
+               'permissions': get_json_from_permissions(user.items.all())}
+
+    return HttpResponse(content=str(content))
